@@ -13,6 +13,11 @@ class User(BaseModel):
     email: str
     password: str
 
+class UserRegister(BaseModel):
+    email: str
+    password: str
+    name: str
+
 class access_jwt(BaseModel):
     access_token: str
     token_type: Optional[str] = "bearer"
@@ -32,7 +37,7 @@ def decode_token(token):
         return False
     
 @auth.post("/login", response_model=access_jwt)
-async def login(data: User):
+def login(data: User):
     cursor = conn.cursor(dictionary=True)
     cursor.execute("SELECT * FROM users WHERE email=%s AND password=%s", (data.email, data.password))
     user = cursor.fetchone()
@@ -63,4 +68,13 @@ def get_current_user(token: str = Depends(OAuth2PasswordBearer(tokenUrl="login")
 @auth.get("/users/me")
 async def read_users_me(current_user: User = Depends(get_current_user)):
     return current_user
+
+
+@auth.post("/register")
+def register(data: UserRegister):
+    cursor = conn.cursor(dictionary=True)
+    cursor.execute("INSERT INTO users (email, password, name) VALUES (%s, %s, %s)", (data.email, data.password, data.name))
+    conn.commit()
+    cursor.close()
+    return {"message": "User registered successfully"}
 
