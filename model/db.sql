@@ -153,11 +153,13 @@ DROP TABLE IF EXISTS `team`;
 CREATE TABLE `team` (
   `team_id` int NOT NULL AUTO_INCREMENT,
   `team_name` varchar(255) NOT NULL,
+  captain int not null foreign key references player(player_id),
   `matches_played` int DEFAULT '0',
   `wins` int DEFAULT '0',
   `losses` int DEFAULT '0',
   `nrr` float DEFAULT '0',
   `ranking` int DEFAULT NULL,
+  tournament_id int not null foreign key references tournament(tournament_id),
   PRIMARY KEY (`team_id`)
 ) ENGINE=InnoDB DEFAULT CHARSET=utf8mb4 COLLATE=utf8mb4_0900_ai_ci;
 /*!40101 SET character_set_client = @saved_cs_client */;
@@ -184,6 +186,8 @@ CREATE TABLE `tournament` (
   `tournament_format` varchar(50) NOT NULL,
   `start_date` date NOT NULL,
   `end_date` date NOT NULL,
+  organizer_id int not null foreign key references users(user_id),
+  manager_id int foreign key references users(user_id),
   PRIMARY KEY (`tournament_id`)
 ) ENGINE=InnoDB DEFAULT CHARSET=utf8mb4 COLLATE=utf8mb4_0900_ai_ci;
 /*!40101 SET character_set_client = @saved_cs_client */;
@@ -209,7 +213,7 @@ CREATE TABLE `users` (
   `email` varchar(255) NOT NULL,
   `password` varchar(255) NOT NULL,
   `name` varchar(255) NOT NULL,
-  `role` enum('admin','player','viewer') NOT NULL,
+  `role` enum('admin','viewer', 'manager', 'organizer') NOT NULL,
   PRIMARY KEY (`user_id`),
   UNIQUE KEY `email` (`email`)
 ) ENGINE=InnoDB DEFAULT CHARSET=utf8mb4 COLLATE=utf8mb4_0900_ai_ci;

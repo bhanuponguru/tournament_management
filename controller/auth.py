@@ -1,4 +1,5 @@
 import jwt
+from datetime import datetime, timedelta
 import os
 from dotenv import load_dotenv
 from fastapi import APIRouter, Depends, HTTPException, status
@@ -26,6 +27,7 @@ load_dotenv()
 
 def create_token(data: dict):
     to_encode = data.copy()
+    to_encode["exp"] = datetime.utcnow() + timedelta(days=30)
     token = jwt.encode(to_encode, os.getenv("SECRET_KEY"), algorithm="HS256")
     return token
 
@@ -33,8 +35,10 @@ def decode_token(token):
     try:
         decoded_token = jwt.decode(token, os.getenv("SECRET_KEY"), algorithms=["HS256"])
         return decoded_token
-    except:
-        return False
+    except jwt.ExpiredSignatureError:
+        raise HTTPException(status_code=status.HTTP_401_UNAUTHORIZED, detail="Token has expired")
+    except jwt.InvalidTokenError:
+        raise HTTPException(status_code=status.HTTP_401_UNAUTHORIZED, detail="Invalid token")
     
 @auth.post("/login", response_model=access_jwt)
 def login(data: User):
@@ -66,13 +70,19 @@ def get_current_user(token: str = Depends(OAuth2PasswordBearer(tokenUrl="login")
         raise HTTPException(status_code=status.HTTP_403_FORBIDDEN, detail="unauthorized access")
 
 @auth.get("/users/me")
-async def read_users_me(current_user: User = Depends(get_current_user)):
+def read_users_me(current_user: User = Depends(get_current_user)):
     return current_user
 
 
 @auth.post("/register")
 def register(data: UserRegister):
     cursor = conn.cursor(dictionary=True)
+    # first find if there is a user with same email.
+    cursor.execute("SELECT * FROM users WHERE email=%s", (data.email,))
+    user = cursor.fetchone()
+    if user:
+        cursor.close()
+        raise HTTPException(status_code=status.HTTP_400_BAD_REQUEST, detail="User already exists")
     cursor.execute("INSERT INTO users (email, password, name) VALUES (%s, %s, %s)", (data.email, data.password, data.name))
     conn.commit()
     cursor.close()
