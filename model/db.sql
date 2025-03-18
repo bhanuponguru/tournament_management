@@ -42,6 +42,13 @@ CREATE TABLE `log` (
   `wicket_by_id` int DEFAULT NULL,
   `catch_by_id` int DEFAULT NULL,
   `is_stumping` tinyint(1) not null,
+  PRIMARY KEY (`log_id`),
+  FOREIGN KEY (match_id) REFERENCES match_table(match_id),
+  FOREIGN KEY (batsman_id) REFERENCES player(player_id),
+  FOREIGN KEY (bowler_id) REFERENCES player(player_id),
+  FOREIGN KEY (wicket_by_id) REFERENCES player(player_id),
+  FOREIGN KEY (catch_by_id) REFERENCES player(player_id)
+  
 
 ) ENGINE=InnoDB DEFAULT CHARSET=utf8mb4 COLLATE=utf8mb4_0900_ai_ci;
 /*!40101 SET character_set_client = @saved_cs_client */;
@@ -121,7 +128,6 @@ DROP TABLE IF EXISTS `player`;
 /*!50503 SET character_set_client = utf8mb4 */;
 CREATE TABLE `player` (
   `player_id` int NOT NULL AUTO_INCREMENT,
-  `format` varchar(50) NOT NULL,
   `name` varchar(255) NOT NULL,
   `team_id` int DEFAULT NULL,
   `runs` int DEFAULT '0',
@@ -153,14 +159,16 @@ DROP TABLE IF EXISTS `team`;
 CREATE TABLE `team` (
   `team_id` int NOT NULL AUTO_INCREMENT,
   `team_name` varchar(255) NOT NULL,
-  captain int not null foreign key references player(player_id),
+  captain int not null,
   `matches_played` int DEFAULT '0',
   `wins` int DEFAULT '0',
   `losses` int DEFAULT '0',
   `nrr` float DEFAULT '0',
   `ranking` int DEFAULT NULL,
-  tournament_id int not null foreign key references tournament(tournament_id),
-  PRIMARY KEY (`team_id`)
+  tournament_id int not null,
+  PRIMARY KEY (`team_id`),
+  foreign key (tournament_id) references tournament(tournament_id),
+  foreign key (captain) references player(player_id)
 ) ENGINE=InnoDB DEFAULT CHARSET=utf8mb4 COLLATE=utf8mb4_0900_ai_ci;
 /*!40101 SET character_set_client = @saved_cs_client */;
 
@@ -186,9 +194,11 @@ CREATE TABLE `tournament` (
   `tournament_format` varchar(50) NOT NULL,
   `start_date` date NOT NULL,
   `end_date` date NOT NULL,
-  organizer_id int not null foreign key references users(user_id),
-  manager_id int foreign key references users(user_id),
-  PRIMARY KEY (`tournament_id`)
+  organizer_id int not null,
+  manager_id int not null,
+  PRIMARY KEY (`tournament_id`),
+  foreign key (manager_id) references users(user_id),
+  foreign key (organizer_id) references users(user_id)
 ) ENGINE=InnoDB DEFAULT CHARSET=utf8mb4 COLLATE=utf8mb4_0900_ai_ci;
 /*!40101 SET character_set_client = @saved_cs_client */;
 

@@ -68,7 +68,8 @@ def get_current_user(token: str = Depends(OAuth2PasswordBearer(tokenUrl="login")
     else:
         raise HTTPException(status_code=status.HTTP_403_FORBIDDEN, detail="unauthorized access")
 
-@auth.get("/users/me")
+
+@auth.get("/users/current")
 def read_users_me(current_user: User = Depends(get_current_user)):
     return current_user
 
