@@ -1,5 +1,6 @@
 from fastapi import FastAPI
 from auth import auth
+from match import match
 from fastapi.middleware.cors import CORSMiddleware
 app = FastAPI()
 app.add_middleware(
@@ -11,6 +12,7 @@ app.add_middleware(
 )
 
 app.include_router(auth)
+app.include_router(match)
 
 def main():
     import uvicorn

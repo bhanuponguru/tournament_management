@@ -33,16 +33,16 @@ DROP TABLE IF EXISTS `log`;
 CREATE TABLE `log` (
   `log_id` int NOT NULL AUTO_INCREMENT,
   `match_id` int NOT NULL,
-  `player_id` int NOT NULL,
-  `runs` int DEFAULT '0',
-  `wickets` int DEFAULT '0',
-  `overs_bowled` float DEFAULT '0',
-  `balls_played` int DEFAULT '0',
-  PRIMARY KEY (`log_id`),
-  KEY `match_id` (`match_id`),
-  KEY `player_id` (`player_id`),
-  CONSTRAINT `log_ibfk_1` FOREIGN KEY (`match_id`) REFERENCES `match_table` (`match_id`) ON DELETE CASCADE,
-  CONSTRAINT `log_ibfk_2` FOREIGN KEY (`player_id`) REFERENCES `player` (`player_id`) ON DELETE CASCADE
+  `batsman_id` int NOT NULL,
+  `bowler_id` int NOT NULL,
+  `bowler_score` int NOT NULL,
+  `batsman_score` int NOT NULL,
+  `ball_type` varchar(50) NOT NULL,
+  `wicket_type` varchar(50) DEFAULT NULL,
+  `wicket_by_id` int DEFAULT NULL,
+  `catch_by_id` int DEFAULT NULL,
+  `is_stumping` tinyint(1) not null,
+
 ) ENGINE=InnoDB DEFAULT CHARSET=utf8mb4 COLLATE=utf8mb4_0900_ai_ci;
 /*!40101 SET character_set_client = @saved_cs_client */;
 
