@@ -10,7 +10,6 @@ const Login = () => {
     const [error,setError] = useState("");
     const [message,setMessage] = useState("");
     const [cookies,setCookie,removeCookie] = useCookies(["token"]);
-    console.log(cookies);
     if(cookies.token){
         return <Navigate to="/" />
     }
