@@ -20,7 +20,7 @@ const Login = () => {
             email: email,
             password: password
         }).then((response) => {;
-            setCookie('token',response.data.access_token);
+            setCookie('token',response.data.access_token,{path: '/',maxAge: 604800});
         }).catch((error) => {
             console.log(error);
             setError("Invalid Credentials");

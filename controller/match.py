@@ -60,13 +60,13 @@ def get_matches_today(user: dict = Depends(get_current_user)):
     if user['role'] != 'manager':
         raise HTTPException(status_code=403, detail="You are not a manager")
     cursor = conn.cursor(dictionary=True)
-    cursor.execute("SELECT * FROM matches WHERE date_time >= CURDATE() AND date_time < CURDATE() + INTERVAL 1 DAY")
+    cursor.execute("SELECT * FROM match_table WHERE date_time >= CURDATE() AND date_time < CURDATE() + INTERVAL 1 DAY")
     matches= cursor.fetchall()
     matches2=[]
     for match in matches:
-        cursor.execute("select * from teams where team_id = %s", (match["team_a"],))
+        cursor.execute("select * from team where team_id = %s", (match["team_a"],))
         team_a = cursor.fetchone()
-        cursor.execute("select * from teams where team_id = %s", (match["team_b"],))
+        cursor.execute("select * from team where team_id = %s", (match["team_b"],))
         team_b = cursor.fetchone()
         match["team_a"] = team_a
         match["team_b"] = team_b
