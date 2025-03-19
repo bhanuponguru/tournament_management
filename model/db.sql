@@ -190,8 +190,8 @@ DROP TABLE IF EXISTS `tournament`;
 /*!50503 SET character_set_client = utf8mb4 */;
 CREATE TABLE `tournament` (
   `tournament_id` int NOT NULL AUTO_INCREMENT,
-  `tournament_name` varchar(255) NOT NULL,
-  `tournament_format` varchar(50) NOT NULL,
+  `name` varchar(255) NOT NULL,
+  `format` varchar(50) NOT NULL,
   `start_date` date NOT NULL,
   `end_date` date NOT NULL,
   organizer_id int not null,

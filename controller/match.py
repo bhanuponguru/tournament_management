@@ -14,38 +14,38 @@ class score_update(BaseModel):
 
 match= APIRouter()
 
-@match.get("/matches")
+@match.get("/")
 def get_matches(user: dict = Depends(get_current_user)):
     cursor = conn.cursor(dictionary=True)
-    cursor.execute("SELECT * FROM matches")
+    cursor.execute("SELECT * FROM match")
     return cursor.fetchall()
 
-@match.get("/matche/{match_id}")
+@match.get("/{match_id}")
 def get_match(match_id: int, user: dict = Depends(get_current_user)):
     cursor = conn.cursor(dictionary=True)
-    cursor.execute("SELECT * FROM matches WHERE match_id = %s", (match_id,))
+    cursor.execute("SELECT * FROM match WHERE match_id = %s", (match_id,))
     return cursor.fetchone()
 
-@match.post("/matches/{match_id}/score")
+@match.post("/{match_id}/score")
 def update_score(match_id: int, score: score_update, user: dict = Depends(get_current_user)):
     if user["role"] != "manager":
         raise HTTPException(status_code=403, detail="You are not a manager")
     cursor = conn.cursor(dictionary=True)
-    cursor.execute("SELECT * FROM matches WHERE match_id = %s", (match_id,))
+    cursor.execute("SELECT * FROM match WHERE match_id = %s", (match_id,))
     match = cursor.fetchone()
     if not match:
         raise HTTPException(status_code=404, detail="Match not found")
     #fetch batsman and bowler and check if they belong to a team in this match
-    cursor.execute("SELECT * FROM players WHERE player_id = %s", (score.batsman_id,))
+    cursor.execute("SELECT * FROM player WHERE player_id = %s", (score.batsman_id,))
     batsman = cursor.fetchone()
-    cursor.execute("SELECT * FROM players WHERE player_id = %s", (score.bowler_id,))
+    cursor.execute("SELECT * FROM player WHERE player_id = %s", (score.bowler_id,))
     bowler = cursor.fetchone()
     if not batsman or not bowler:
         raise HTTPException(status_code=404, detail="Player not found")
-    cursor.execute("SELECT * FROM teams WHERE team_id = %s", (batsman["team_id"],
+    cursor.execute("SELECT * FROM team WHERE team_id = %s", (batsman["team_id"],
     ))
     team_a= cursor.fetchone()
-    cursor.execute("SELECT * FROM teams WHERE team_id = %s", (bowler["team_id"],
+    cursor.execute("SELECT * FROM team WHERE team_id = %s", (bowler["team_id"],
     ))
     team_b= cursor.fetchone()
     if not team_a or not team_b or team_a["match_id"] != match_id or team_b["match_id"] != match_id:
@@ -55,12 +55,12 @@ def update_score(match_id: int, score: score_update, user: dict = Depends(get_cu
     conn.commit()
     return {"message": "Score updated successfully"}
 
-@match.get("/matches/today")
+@match.get("/match/today")
 def get_matches_today(user: dict = Depends(get_current_user)):
     if user['role'] != 'manager':
         raise HTTPException(status_code=403, detail="You are not a manager")
     cursor = conn.cursor(dictionary=True)
-    cursor.execute("SELECT * FROM match_table WHERE date_time >= CURDATE() AND date_time < CURDATE() + INTERVAL 1 DAY")
+    cursor.execute("SELECT * FROM match WHERE date_time >= CURDATE() AND date_time < CURDATE() + INTERVAL 1 DAY")
     matches= cursor.fetchall()
     matches2=[]
     for match in matches:

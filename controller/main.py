@@ -1,6 +1,7 @@
 from fastapi import FastAPI
 from auth import auth
 from match import match
+from team import team
 from tournament import tournament
 from fastapi.middleware.cors import CORSMiddleware
 app = FastAPI()
@@ -12,9 +13,11 @@ app.add_middleware(
     allow_headers=["*"],  # Allows all headers
 )
 
-app.include_router(auth)
-app.include_router(match)
-app.include_router(tournament)
+app.include_router(auth, prefix="/users")
+app.include_router(match, prefix="/matches")
+app.include_router(team, prefix="/teams")
+app.include_router(tournament, prefix="/tournaments")
+
 
 
 def main():

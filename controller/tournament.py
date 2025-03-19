@@ -7,7 +7,7 @@ from auth import get_current_user
 
 tournament = APIRouter()
 
-@tournament.post("/tournaments/create")
+@tournament.post("/create")
 def create_tournament(data: dict, user: dict = Depends(get_current_user)):
     if user["role"] == "organizer" or user["role"] == "manager":
         cursor = conn.cursor(dictionary=True)
@@ -24,7 +24,7 @@ def create_tournament(data: dict, user: dict = Depends(get_current_user)):
         return {"message": "Tournament created successfully"}
     raise HTTPException(status_code=status.HTTP_401_UNAUTHORIZED, detail="You are not authorized to perform this action")
 
-@tournament.get("/tournaments")
+@tournament.get("/")
 def get_tournaments(user: dict = Depends(get_current_user)):
     cursor = conn.cursor(dictionary=True)
     if user["role"] == "organizer":
