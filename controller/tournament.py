@@ -1,5 +1,5 @@
 from fastapi import APIRouter, Depends, HTTPException, status
-from db import db
+from db import get_connection
 from pydantic import BaseModel
 from typing import Optional, List
 from datetime import datetime, date
@@ -10,7 +10,7 @@ tournament = APIRouter()
 @tournament.post("/create")
 def create_tournament(data: dict, user: dict = Depends(get_current_user)):
     if user["role"] == "organizer" or user["role"] == "manager":
-        conn = db.get_connection()
+        conn = get_connection()
         cursor = conn.cursor(dictionary=True)
         cursor.execute("SELECT user_id,role FROM users WHERE email = %s", (data["manager_email"],))
         manager = cursor.fetchone()
@@ -29,7 +29,7 @@ def create_tournament(data: dict, user: dict = Depends(get_current_user)):
 
 @tournament.get("/")
 def get_tournaments(user: dict = Depends(get_current_user)):
-    conn = db.get_connection()
+    conn = get_connection()
     cursor = conn.cursor(dictionary=True)
     if user["role"] == "organizer":
         cursor.execute("SELECT * FROM tournament WHERE organizer_id = %s", (user["user_id"],))

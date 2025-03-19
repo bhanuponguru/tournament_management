@@ -1,6 +1,6 @@
 from fastapi import APIRouter, Depends, HTTPException, status
 from auth import get_current_user
-from db import db
+from db import get_connection
 from pydantic import BaseModel
 class score_update(BaseModel):
     bowler_score: int
@@ -16,7 +16,7 @@ match= APIRouter()
 
 @match.get("/")
 def get_matches(user: dict = Depends(get_current_user)):
-    conn=db.get_connection()
+    conn=get_connection()
     cursor = conn.cursor(dictionary=True)
     cursor.execute("SELECT * FROM match")
     cursor.close()
@@ -25,7 +25,7 @@ def get_matches(user: dict = Depends(get_current_user)):
 
 @match.get("/{match_id}")
 def get_match(match_id: int, user: dict = Depends(get_current_user)):
-    conn=db.get_connection()
+    conn=get_connection()
     cursor = conn.cursor(dictionary=True)
     cursor.execute("SELECT * FROM match WHERE match_id = %s", (match_id,))
     match = cursor.fetchone()
@@ -39,7 +39,7 @@ def get_match(match_id: int, user: dict = Depends(get_current_user)):
 def update_score(match_id: int, score: score_update, user: dict = Depends(get_current_user)):
     if user["role"] != "manager":
         raise HTTPException(status_code=403, detail="You are not a manager")
-    conn=db.get_connection()
+    conn=get_connection()
     cursor = conn.cursor(dictionary=True)
     cursor.execute("SELECT * FROM match WHERE match_id = %s", (match_id,))
     match = cursor.fetchone()
@@ -71,7 +71,7 @@ def update_score(match_id: int, score: score_update, user: dict = Depends(get_cu
 def get_matches_today(user: dict = Depends(get_current_user)):
     if user['role'] != 'manager':
         raise HTTPException(status_code=403, detail="You are not a manager")
-    conn=db.get_connection()
+    conn=get_connection()
     cursor = conn.cursor(dictionary=True)
     cursor.execute("SELECT * FROM match WHERE date_time >= CURDATE() AND date_time < CURDATE() + INTERVAL 1 DAY")
     matches= cursor.fetchall()
