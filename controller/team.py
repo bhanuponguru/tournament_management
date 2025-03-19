@@ -1,5 +1,5 @@
 from fastapi import APIRouter, Depends, HTTPException, status
-from db import conn
+from db import db
 from pydantic import BaseModel
 from typing import Optional, List
 from datetime import datetime, date
@@ -17,6 +17,7 @@ team = APIRouter()
 def create_team(data: Team, user: dict = Depends(get_current_user)):
     if user["role"] != "manager":
         raise HTTPException(status_code=status.HTTP_401_UNAUTHORIZED, detail="You are not authorized to perform this action")
+    conn=db.get_connection()
     cursor = conn.cursor(dictionary=True)
     captain_id=0
     cursor.execute("INSERT INTO team (name, tournament_id) VALUES (%s, %s)", (data.name, data.tournament_id))
@@ -27,4 +28,6 @@ def create_team(data: Team, user: dict = Depends(get_current_user)):
             captain_id = cursor.lastrowid
             cursor.execute("UPDATE team SET captain_id = %s WHERE team_id = %s", (captain_id, team_id))
     conn.commit()
+    cursor.close()
+    conn.close()
     return {"message": "Team created successfully"}

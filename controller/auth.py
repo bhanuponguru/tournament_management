@@ -4,7 +4,7 @@ import os
 from dotenv import load_dotenv
 from fastapi import APIRouter, Depends, HTTPException, status
 from fastapi.security import OAuth2PasswordBearer, OAuth2PasswordRequestForm
-from db import conn
+from db import db
 from pydantic import BaseModel
 from typing import Optional
 auth = APIRouter()
@@ -41,10 +41,12 @@ def decode_token(token):
     
 @auth.post("/login", response_model=access_jwt)
 def login(data: User):
+    conn=db.get_connection()
     cursor = conn.cursor(dictionary=True)
     cursor.execute("SELECT * FROM users WHERE email=%s AND password=%s", (data.email, data.password))
     user = cursor.fetchone()
     cursor.close()
+    conn.close()
     if user:
         user_data = {
             "id": user["user_id"],
@@ -59,6 +61,7 @@ def get_current_user(token: str = Depends(OAuth2PasswordBearer(tokenUrl="login")
     user = decode_token(token)
     if not user:
         raise HTTPException(status_code=status.HTTP_401_UNAUTHORIZED, detail="Invalid token")
+    conn=db.get_connection()
     cursor = conn.cursor(dictionary=True)
     cursor.execute("SELECT * FROM users WHERE user_id=%s", (user["id"],))
     u = cursor.fetchone()
@@ -81,6 +84,7 @@ def verify_role(role: str, user: dict = Depends(get_current_user)):
 
 @auth.post("/register")
 def register(data: UserRegister):
+    conn=db.get_connection()
     cursor = conn.cursor(dictionary=True)
     # first find if there is a user with same email.
     cursor.execute("SELECT * FROM users WHERE email=%s", (data.email,))
@@ -91,5 +95,6 @@ def register(data: UserRegister):
     cursor.execute("INSERT INTO users (email, password, name, role) VALUES (%s, %s, %s, %s)", (data.email, data.password, data.name, "viewer"))
     conn.commit()
     cursor.close()
+    conn.close()
     return {"message": "User registered successfully"}
 

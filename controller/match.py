@@ -1,6 +1,6 @@
 from fastapi import APIRouter, Depends, HTTPException, status
 from auth import get_current_user
-from db import conn
+from db import db
 from pydantic import BaseModel
 class score_update(BaseModel):
     bowler_score: int
@@ -16,20 +16,30 @@ match= APIRouter()
 
 @match.get("/")
 def get_matches(user: dict = Depends(get_current_user)):
+    conn=db.get_connection()
     cursor = conn.cursor(dictionary=True)
     cursor.execute("SELECT * FROM match")
+    cursor.close()
+    conn.close()
     return cursor.fetchall()
 
 @match.get("/{match_id}")
 def get_match(match_id: int, user: dict = Depends(get_current_user)):
+    conn=db.get_connection()
     cursor = conn.cursor(dictionary=True)
     cursor.execute("SELECT * FROM match WHERE match_id = %s", (match_id,))
-    return cursor.fetchone()
+    match = cursor.fetchone()
+    cursor.close()
+    conn.close()
+    if not match:
+        raise HTTPException(status_code=404, detail="Match not found")
+    return match
 
 @match.post("/{match_id}/score")
 def update_score(match_id: int, score: score_update, user: dict = Depends(get_current_user)):
     if user["role"] != "manager":
         raise HTTPException(status_code=403, detail="You are not a manager")
+    conn=db.get_connection()
     cursor = conn.cursor(dictionary=True)
     cursor.execute("SELECT * FROM match WHERE match_id = %s", (match_id,))
     match = cursor.fetchone()
@@ -53,12 +63,15 @@ def update_score(match_id: int, score: score_update, user: dict = Depends(get_cu
     #update score
     cursor.execute("INSERT INTO scores (match_id, batsman_id, bowler_id, bowler_score, batsman_score, ball_type, wicket_type, wicket_by_id, catch_by_id, is_stumping) VALUES (%s, %s, %s, %s, %s, %s, %s, %s, %s, %s)", (match_id, score.batsman_id, score.bowler_id, score.bowler_score, score.batsman_score, score.ball_type, score.wicket_type, score.wicket_by_id, score.catch_by_id, score.is_stumping))
     conn.commit()
+    cursor.close()
+    conn.close()
     return {"message": "Score updated successfully"}
 
 @match.get("/match/today")
 def get_matches_today(user: dict = Depends(get_current_user)):
     if user['role'] != 'manager':
         raise HTTPException(status_code=403, detail="You are not a manager")
+    conn=db.get_connection()
     cursor = conn.cursor(dictionary=True)
     cursor.execute("SELECT * FROM match WHERE date_time >= CURDATE() AND date_time < CURDATE() + INTERVAL 1 DAY")
     matches= cursor.fetchall()
@@ -71,4 +84,6 @@ def get_matches_today(user: dict = Depends(get_current_user)):
         match["team_a"] = team_a
         match["team_b"] = team_b
         matches2.append(match)
+    cursor.close()
+    conn.close()
     return matches2
