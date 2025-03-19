@@ -7,8 +7,6 @@ from auth import get_current_user
 
 class Team(BaseModel):
     name: str
-    players: List[str]
-    captain: str
     tournament_id: str
 
 team = APIRouter()
@@ -19,15 +17,23 @@ def create_team(data: Team, user: dict = Depends(get_current_user)):
         raise HTTPException(status_code=status.HTTP_401_UNAUTHORIZED, detail="You are not authorized to perform this action")
     conn=get_connection()
     cursor = conn.cursor(dictionary=True)
-    captain_id=0
     cursor.execute("INSERT INTO team (name, tournament_id) VALUES (%s, %s)", (data.name, data.tournament_id))
-    team_id = cursor.lastrowid
-    for player in data.players:
-        cursor.execute("INSERT INTO player (team_id, name) VALUES (%s, %s)", (team_id, player))
-        if player == data.captain:
-            captain_id = cursor.lastrowid
-            cursor.execute("UPDATE team SET captain_id = %s WHERE team_id = %s", (captain_id, team_id))
     conn.commit()
     cursor.close()
     conn.close()
     return {"message": "Team created successfully"}
+
+
+@team.get("/")
+def get_teams(tournament_id: str = None, user: dict = Depends(get_current_user)):
+    conn=get_connection()
+    cursor = conn.cursor(dictionary=True)
+    if tournament_id:
+        cursor.execute("SELECT * FROM team WHERE tournament_id = %s", (tournament_id,))
+    else:
+        cursor.execute("SELECT * FROM team")
+    teams = cursor.fetchall()
+    cursor.close()
+    conn.close()
+    return teams
+

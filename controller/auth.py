@@ -7,6 +7,7 @@ from fastapi.security import OAuth2PasswordBearer, OAuth2PasswordRequestForm
 from db import get_connection
 from pydantic import BaseModel
 from typing import Optional
+
 auth = APIRouter()
 
 class User(BaseModel):
