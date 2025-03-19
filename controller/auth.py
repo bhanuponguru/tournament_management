@@ -88,7 +88,7 @@ def register(data: UserRegister):
     if user:
         cursor.close()
         raise HTTPException(status_code=status.HTTP_400_BAD_REQUEST, detail="User already exists")
-    cursor.execute("INSERT INTO users (email, password, name) VALUES (%s, %s, %s)", (data.email, data.password, data.name))
+    cursor.execute("INSERT INTO users (email, password, name, role) VALUES (%s, %s, %s, %s)", (data.email, data.password, data.name, "viewer"))
     conn.commit()
     cursor.close()
     return {"message": "User registered successfully"}
