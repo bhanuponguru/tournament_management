@@ -14,7 +14,7 @@ const Navbar = () => {
                     <Link to="/" className="text-white hover:text-gray-200 p-2">Home</Link>
                     <Link to="/matchs" className="text-white p-2">Matchs</Link>
                     <Link to="/points" className="text-white p-2">Point Table</Link>
-                    <Link to="/manager_portal" className="text-white p-2">Manager Portal</Link>
+                    <Link to="/manager_portal" className="text-white p-2">Managment Portal</Link>
                     <button className="text-white p-2" onClick={handleClick} >LogOut</button>
                 </div>
             </div>
