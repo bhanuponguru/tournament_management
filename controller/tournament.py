@@ -27,5 +27,10 @@ def create_tournament(data: dict, user: dict = Depends(get_current_user)):
 @tournament.get("/tournaments")
 def get_tournaments(user: dict = Depends(get_current_user)):
     cursor = conn.cursor(dictionary=True)
-    cursor.execute("SELECT * FROM tournament")
+    if user["role"] == "organizer":
+        cursor.execute("SELECT * FROM tournament WHERE organizer_id = %s", (user["user_id"],))
+    elif user["role"] == "manager":
+        cursor.execute("SELECT * FROM tournament WHERE manager_id = %s", (user["user_id"],))
+    else:
+        cursor.execute("SELECT * FROM tournament")
     return cursor.fetchall()
