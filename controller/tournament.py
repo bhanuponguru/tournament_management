@@ -36,9 +36,20 @@ def get_tournaments(user: dict = Depends(get_current_user)):
     elif user["role"] == "manager":
         cursor.execute("SELECT * FROM tournament WHERE manager_id = %s", (user["user_id"],))
     else:
-        cursor.execute("SELECT * FROM tournament")
+        cursor.close()
+        conn.close()
+        raise HTTPException(status_code=status.HTTP_401_UNAUTHORIZED, detail="You are not authorized to perform this action")
     tournaments = cursor.fetchall()
     cursor.close()
     conn.close()
     return tournaments
 
+@tournament.get("/all")
+def get_all_tournaments(user: dict = Depends(get_current_user)):
+    conn = get_connection()
+    cursor = conn.cursor(dictionary=True)
+    cursor.execute("SELECT * FROM tournament")
+    tournaments = cursor.fetchall()
+    cursor.close()
+    conn.close()
+    return tournaments
