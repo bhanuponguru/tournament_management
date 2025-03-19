@@ -74,8 +74,8 @@ def verify_user(user: dict = Depends(get_current_user)):
     return None
 
 @auth.get("/verify_role")
-def verify_role(data: dict, user: dict = Depends(get_current_user)):
-    if user["role"] == data["role"]:
+def verify_role(role: str, user: dict = Depends(get_current_user)):
+    if user["role"] == role:
         return None
     raise HTTPException(status_code=status.HTTP_403_FORBIDDEN, detail="unauthorized access")
 
