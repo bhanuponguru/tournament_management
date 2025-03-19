@@ -16,7 +16,7 @@ function App() {
         <Route path="/login" element={<Login />} />
         <Route element={<ProtectedRoutes />}>
           <Route path="/" element={<Home />} />
-          <Route element={<RoleProtectedRoutes role = {"manager"} />}>
+          <Route element={<RoleProtectedRoutes role1 = {"manager"} role2 = {"organizer"} />}>
             <Route path="/manager_portal" element={<ManagerPortalHome />} />
             <Route path="/manager_portal/score" element={<ScorePortal />} />
             <Route path="/manager_portal/teams" element={<TeamsPortal />} />

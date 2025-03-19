@@ -15,7 +15,7 @@ const Login = () => {
     }
     const handleLogin = () => {
         const base_url = process.env.REACT_APP_baseUrl;
-        const url = base_url + "/login";
+        const url = base_url + "/users/login";
         axios.post(url, {
             email: email,
             password: password
@@ -30,14 +30,14 @@ const Login = () => {
     }
     const hadleSignup = () => {
         const base_url = process.env.REACT_APP_baseUrl;
-        const url = base_url + "/register";
+        const url = base_url + "/users/register";
         axios.post(url, {
             email: email,
             password: password,
             name: name
         }).then((response) => {
-            setMessage(response.data.message);
-            localStorage.setItem('token', response.data.token);
+            setMessage("Signup Successful Please login to continue");
+            setOnLogin(true);
         }).catch((error) => {
             console.log(error);
             setError(error);
