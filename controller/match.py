@@ -2,6 +2,12 @@ from fastapi import APIRouter, Depends, HTTPException, status
 from auth import get_current_user
 from db import get_connection
 from pydantic import BaseModel
+
+class match_create(BaseModel):
+    team_a: int
+    team_b: int
+    
+
 class score_update(BaseModel):
     match_id: int
     bowler_score: int
@@ -38,7 +44,7 @@ def get_match(match_id: int, user: dict = Depends(get_current_user)):
 
 @match.post("/{match_id}/score")
 def update_score(score: score_update, user: dict = Depends(get_current_user)):
-    if user["role"] != "manager":
+    if user["role"] != "manager" and user["role"] != "organizer":
         raise HTTPException(status_code=403, detail="You are not a manager")
     conn=get_connection()
     cursor = conn.cursor(dictionary=True)
@@ -71,7 +77,7 @@ def update_score(score: score_update, user: dict = Depends(get_current_user)):
 
 @match.get("/match/today")
 def get_matches_today(user: dict = Depends(get_current_user)):
-    if user['role'] != 'manager':
+    if user['role'] != 'manager' and user['role'] != 'organizer':
         raise HTTPException(status_code=403, detail="You are not a manager")
     conn=get_connection()
     cursor = conn.cursor(dictionary=True)
