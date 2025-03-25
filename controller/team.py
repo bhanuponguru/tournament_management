@@ -37,3 +37,26 @@ def get_teams(tournament_id: str = None, user: dict = Depends(get_current_user))
     conn.close()
     return teams
 
+@team.get('/players')
+def get_players(team_id: int, user: dict = Depends(get_current_user)):
+    conn=get_connection()
+    cursor = conn.cursor(dictionary=True)
+    cursor.execute("SELECT * FROM player WHERE team_id = %s", (team_id,))
+    players = cursor.fetchall()
+    cursor.close()
+    conn.close()
+    return players
+
+@team.get('/get_team')
+def get_team(team_id: int, user: dict = Depends(get_current_user)):
+    conn=get_connection()
+    cursor = conn.cursor(dictionary=True)
+    cursor.execute("SELECT * FROM team WHERE team_id = %s", (team_id,))
+    team = cursor.fetchone()
+    cursor.close()
+    conn.close()
+    if not team:
+        raise HTTPException(status_code=404, detail="Team not found")
+    return team
+
+

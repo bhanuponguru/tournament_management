@@ -1,11 +1,15 @@
+import datetime
 from fastapi import APIRouter, Depends, HTTPException, status
 from auth import get_current_user
 from db import get_connection
 from pydantic import BaseModel
 
 class match_create(BaseModel):
-    team_a: int
-    team_b: int
+    team_a_id: int
+    team_b_id: int
+    location: str
+    date_time: datetime.datetime
+    tournament_id: int
     
 
 class score_update(BaseModel):
@@ -25,16 +29,17 @@ match= APIRouter()
 def get_matches(user: dict = Depends(get_current_user)):
     conn=get_connection()
     cursor = conn.cursor(dictionary=True)
-    cursor.execute("SELECT * FROM match")
+    cursor.execute("SELECT * FROM matches")
+    matches = cursor.fetchall()
     cursor.close()
     conn.close()
-    return cursor.fetchall()
+    return matches
 
 @match.get("/{match_id}")
 def get_match(match_id: int, user: dict = Depends(get_current_user)):
     conn=get_connection()
     cursor = conn.cursor(dictionary=True)
-    cursor.execute("SELECT * FROM match WHERE match_id = %s", (match_id,))
+    cursor.execute("SELECT * FROM matches WHERE match_id = %s", (match_id,))
     match = cursor.fetchone()
     cursor.close()
     conn.close()
@@ -42,14 +47,14 @@ def get_match(match_id: int, user: dict = Depends(get_current_user)):
         raise HTTPException(status_code=404, detail="Match not found")
     return match
 
-@match.post("/{match_id}/score")
+@match.put("/{match_id}/score")
 def update_score(score: score_update, user: dict = Depends(get_current_user)):
     if user["role"] != "manager" and user["role"] != "organizer":
         raise HTTPException(status_code=403, detail="You are not a manager")
     conn=get_connection()
     cursor = conn.cursor(dictionary=True)
     match_id=score.match_id
-    cursor.execute("SELECT * FROM match WHERE match_id = %s", (match_id,))
+    cursor.execute("SELECT * FROM matches WHERE match_id = %s", (match_id,))
     match = cursor.fetchone()
     if not match:
         raise HTTPException(status_code=404, detail="Match not found")
@@ -81,7 +86,7 @@ def get_matches_today(user: dict = Depends(get_current_user)):
         raise HTTPException(status_code=403, detail="You are not a manager")
     conn=get_connection()
     cursor = conn.cursor(dictionary=True)
-    cursor.execute("SELECT * FROM match WHERE date_time >= CURDATE() AND date_time < CURDATE() + INTERVAL 1 DAY")
+    cursor.execute("SELECT * FROM matches WHERE date_time >= CURDATE() AND date_time < CURDATE() + INTERVAL 1 DAY")
     matches= cursor.fetchall()
     matches2=[]
     for match in matches:
@@ -95,3 +100,33 @@ def get_matches_today(user: dict = Depends(get_current_user)):
     cursor.close()
     conn.close()
     return matches2
+
+@match.post("/create")
+def create_match(data: match_create, user: dict = Depends(get_current_user)):
+    if user["role"] != "manager" and user["role"] != "organizer":
+        raise HTTPException(status_code=403, detail="You are not a manager")
+    conn=get_connection()
+    cursor = conn.cursor(dictionary=True)
+    cursor.execute("SELECT * FROM team WHERE team_id = %s", (data.team_a_id,))
+    team_a = cursor.fetchone()
+    cursor.execute("SELECT * FROM team WHERE team_id = %s", (data.team_b_id,))
+    team_b = cursor.fetchone()
+    if not team_a or not team_b:
+        raise HTTPException(status_code=404, detail="Team not found")
+    cursor.execute("SELECT * FROM tournament WHERE tournament_id = %s", (data.tournament_id,))
+    tournament = cursor.fetchone()
+    if not tournament:
+        raise HTTPException(status_code=404, detail="Tournament not found")
+    if user["role"] == "manager" and user["user_id"] != tournament["manager_id"]:
+        raise HTTPException(status_code=403, detail="You are not a manager of this tournament")
+    if user["role"] == "organizer" and user["user_id"] != tournament["organizer_id"]:
+        raise HTTPException(status_code=403, detail="You are not an organizer of this tournament")
+    cursor.execute("INSERT INTO matches (team_a_id, team_b_id, location, date_time) VALUES (%s, %s, %s, %s)", (data.team_a_id, data.team_b_id, data.location, data.date_time))
+    match_id = cursor.lastrowid
+    cursor.execute("insert into match_tournament_relation (match_id, tournament_id) values (%s, %s)", (match_id, data.tournament_id))
+    conn.commit()
+    cursor.close()
+    conn.close()
+    return {"message": "Match created successfully"}
+
+
