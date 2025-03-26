@@ -86,3 +86,4 @@ def decline_role_request(data: request, user: dict = Depends(get_current_user)):
     cursor.close()
     conn.close()
     return {"message": "Request declined"}
+

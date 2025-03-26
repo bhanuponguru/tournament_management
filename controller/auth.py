@@ -123,6 +123,11 @@ def get_role_requests(status: str=None, user: dict = Depends(get_current_user)):
     if status: cursor.execute("SELECT * FROM role_requests WHERE status=%s and user_id=%s", (status, user["user_id"]))
     else: cursor.execute("SELECT * FROM role_requests WHERE user_id=%s", (user["user_id"],))
     requests = cursor.fetchall()
+    for r in requests:
+        if not r["admin_id"]: continue
+        cursor.execute("SELECT email FROM users WHERE user_id=%s", (r["admin_id"],))
+        a = cursor.fetchone()
+        r["admin_email"] = a["email"]
     cursor.close()
     conn.close()
     return requests
