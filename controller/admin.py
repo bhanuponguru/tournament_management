@@ -44,7 +44,7 @@ def get_role_requests(status: str = None, user: dict = Depends(get_current_user)
         if status ==  'pending': cursor.execute("SELECT * FROM role_requests WHERE status=%s", (status,))
         else: cursor.execute("SELECT * FROM role_requests WHERE status=%s and admin_id=%s", (status, user["user_id"]))
     else:
-        cursor.execute("SELECT * FROM role_requests")
+        cursor.execute("SELECT * FROM role_requests where status = 'pending' or admin_id=%s or user_id=%s", (user["user_id"], user["user_id"]))
     requests = cursor.fetchall()
     cursor.close()
     conn.close()
