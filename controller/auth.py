@@ -116,11 +116,12 @@ def request_role(data: role_request, user: dict = Depends(get_current_user)):
     conn.close()
     return {"message": "Role requested"}
 
-@auth.get("/role_requests/{status}")
-def get_role_requests(status: str, user: dict = Depends(get_current_user)):
+@auth.get("/role_requests")
+def get_role_requests(status: str=None, user: dict = Depends(get_current_user)):
     conn=get_connection()
     cursor = conn.cursor(dictionary=True)
-    cursor.execute("SELECT * FROM role_requests WHERE status=%s and user_id=%s", (status, user["user_id"]))
+    if status: cursor.execute("SELECT * FROM role_requests WHERE status=%s and user_id=%s", (status, user["user_id"]))
+    else: cursor.execute("SELECT * FROM role_requests WHERE user_id=%s", (user["user_id"],))
     requests = cursor.fetchall()
     cursor.close()
     conn.close()

@@ -80,6 +80,16 @@ def update_score(score: score_update, user: dict = Depends(get_current_user)):
     conn.close()
     return {"message": "Score updated successfully"}
 
+@match.get("/{match_id}/log")
+def get_log(match_id: int, user: dict = Depends(get_current_user)):
+    conn=get_connection()
+    cursor = conn.cursor(dictionary=True)
+    cursor.execute("SELECT * FROM log WHERE match_id = %s", (match_id,))
+    log = cursor.fetchall()
+    cursor.close()
+    conn.close()
+    return log
+
 @match.get("/today")
 def get_matches_today(user: dict = Depends(get_current_user)):
     if user['role'] != 'manager' and user['role'] != 'organizer':
