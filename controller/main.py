@@ -1,4 +1,5 @@
 from fastapi import FastAPI
+from admin import admin
 from auth import auth
 from match import match
 from player import player
@@ -13,7 +14,7 @@ app.add_middleware(
     allow_methods=["*"],  # Allows POST, GET, etc.
     allow_headers=["*"],  # Allows all headers
 )
-
+app.include_router(admin, prefix="/admin", tags=["admin"])
 app.include_router(auth, prefix="/users", tags=["authentication"])
 app.include_router(match, prefix="/matches", tags=["matches"])
 app.include_router(player, prefix="/players", tags=["players"])

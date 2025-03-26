@@ -1,4 +1,5 @@
 import jwt
+import bcrypt
 from datetime import datetime, timedelta
 import os
 from dotenv import load_dotenv
@@ -23,6 +24,10 @@ class access_jwt(BaseModel):
     access_token: str
     token_type: Optional[str] = "bearer"
 
+class role_request(BaseModel):
+    role: str
+    description: str
+
 load_dotenv()
 
 def create_token(data: dict):
@@ -44,17 +49,17 @@ def decode_token(token):
 def login(data: User):
     conn=get_connection()
     cursor = conn.cursor(dictionary=True)
-    cursor.execute("SELECT * FROM users WHERE email=%s AND password=%s", (data.email, data.password))
+    cursor.execute("SELECT * FROM users WHERE email=%s", (data.email,))
     user = cursor.fetchone()
     cursor.close()
     conn.close()
     if user:
-        user_data = {
-            "id": user["user_id"],
-            "email": user["email"]
-        }
-        token = create_token(user_data)
-        return access_jwt(access_token=token)
+        if bcrypt.checkpw(data.password.encode("utf-8"), user["password_hash"].encode("utf-8")):
+            user_data = {"email": user["email"], "id": user["user_id"], "role": user["role"]}
+            token = create_token(user_data)
+            return access_jwt(access_token=token)
+        else:
+            raise HTTPException(status_code=status.HTTP_401_UNAUTHORIZED, detail="Invalid password")
     else:
         raise HTTPException(status_code=status.HTTP_401_UNAUTHORIZED, detail="Invalid credentials")
     
@@ -94,9 +99,30 @@ def register(data: UserRegister):
     if user:
         cursor.close()
         raise HTTPException(status_code=status.HTTP_400_BAD_REQUEST, detail="User already exists")
-    cursor.execute("INSERT INTO users (email, password, name, role) VALUES (%s, %s, %s, %s)", (data.email, data.password, data.name, "viewer"))
+    data.password = bcrypt.hashpw(data.password.encode("utf-8"), bcrypt.gensalt()).decode("utf-8")
+    cursor.execute("INSERT INTO users (email, password_hash, name) VALUES (%s, %s, %s)", (data.email, data.password, data.name))
     conn.commit()
     cursor.close()
     conn.close()
     return {"message": "User registered successfully"}
+
+@auth.post("/request_role")
+def request_role(data: role_request, user: dict = Depends(get_current_user)):
+    conn=get_connection()
+    cursor = conn.cursor(dictionary=True)
+    cursor.execute("INSERT INTO role_requests (user_id, requested_role, description) VALUES (%s, %s, %s)", (user["user_id"], data.role, data.description))
+    conn.commit()
+    cursor.close()
+    conn.close()
+    return {"message": "Role requested"}
+
+@auth.get("/role_requests/{status}")
+def get_role_requests(status: str, user: dict = Depends(get_current_user)):
+    conn=get_connection()
+    cursor = conn.cursor(dictionary=True)
+    cursor.execute("SELECT * FROM role_requests WHERE status=%s and user_id=%s", (status, user["user_id"]))
+    requests = cursor.fetchall()
+    cursor.close()
+    conn.close()
+    return requests
 

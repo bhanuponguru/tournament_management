@@ -80,7 +80,7 @@ def update_score(score: score_update, user: dict = Depends(get_current_user)):
     conn.close()
     return {"message": "Score updated successfully"}
 
-@match.get("/match/today")
+@match.get("/today")
 def get_matches_today(user: dict = Depends(get_current_user)):
     if user['role'] != 'manager' and user['role'] != 'organizer':
         raise HTTPException(status_code=403, detail="You are not a manager")
