@@ -2,6 +2,7 @@ import {React, useState, useLayoutEffect, useEffect} from 'react'
 import { useCookies } from "react-cookie";
 import axios from "../../api/axios";
 import { Link } from "react-router-dom";
+import Navbar from './utils/Navbar';
 
 const TournmentPortal = () => {
   const [cookies] = useCookies(["token"]);
@@ -88,6 +89,7 @@ const TournmentPortal = () => {
 
   return (
     <div className="min-h-screen bg-gray-900 text-white p-6">
+      <Navbar />
       <h1 className="text-3xl font-bold text-center mb-6">Tournament Match Portal</h1>
       
       <div className="max-w-md mx-auto">

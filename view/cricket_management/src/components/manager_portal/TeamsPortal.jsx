@@ -1,6 +1,7 @@
 import {React, useState, useLayoutEffect, useEffect} from 'react'
 import axios from '../../api/axios';
 import {useCookies} from 'react-cookie';
+import Navbar from './utils/Navbar';
 
 const TeamsPortal = () => {
   const [cookies] = useCookies(["token"]);
@@ -149,6 +150,7 @@ const TeamsPortal = () => {
 
   return (
     <div className="min-h-screen bg-gray-900 text-white p-6">
+      <Navbar />
       <h1 className="text-3xl font-bold text-center mb-6">Team Portal</h1>
       <div className="max-w-md mx-auto mb-6">
         <div className="mb-4">

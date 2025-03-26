@@ -44,7 +44,7 @@ const Login = () => {
             setOnLogin(true);
         }).catch((error) => {
             console.log(error);
-            setError(error);
+            setError(error.response.data.detail);
         })
         setEmail("");
         setName("");
