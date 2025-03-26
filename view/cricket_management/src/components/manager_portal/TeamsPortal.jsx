@@ -16,16 +16,22 @@ const TeamsPortal = () => {
   const [showPlayerForm, setShowPlayerForm] = useState(false);
   const [teams, setTeams] = useState([]);
   const [tournaments, setTournaments] = useState([]);
+  const [loadingTournaments, setLoadingTournaments] = useState(true);
+  const [loadingTeams, setLoadingTeams] = useState(false);
+  const [submitLoading, setSubmitLoading] = useState(false);
 
   useLayoutEffect(() => {
     const getTournaments = async () => {
       try {
+        setLoadingTournaments(true);
         const response = await axios.get("/tournaments", {
           headers: { Authorization: `Bearer ${cookies.token}` },
         });
         setTournaments(response.data);
+        setLoadingTournaments(false);
       } catch (error) {
         console.log(error);
+        setLoadingTournaments(false);
       }
     }
     getTournaments();
@@ -52,11 +58,12 @@ const TeamsPortal = () => {
     if(id === "") {
       return;
     }
-    teams.map((team) => {if(team.team_id === id) {setSelectedTeamObj(team);}});
+    teams.map((team) => {if(team.team_id == id) {setSelectedTeamObj(team);}});
   }
 
   const getTeams = async (id) => {
     try {
+      setLoadingTeams(true);
       const response = await axios.get(`/teams/?tournament_id=${id}`, {
         headers: { Authorization: `Bearer ${cookies.token}` },
       });
@@ -67,12 +74,19 @@ const TeamsPortal = () => {
       else {
         setNoTeam(false);
       }
+      setLoadingTeams(false);
     } catch (error) {
       console.log(error);
+      setLoadingTeams(false);
     }
   }
 
   const hanadleAddPlayer = async()=>{
+    setSubmitLoading(true);
+    if(!selectedTeam) {
+      alert("Please select a team");
+      return;
+    }
     if(!playerName) {
       alert("Please fill the player name");
       return;
@@ -97,9 +111,15 @@ const TeamsPortal = () => {
     } catch (error) {
       console.log(error);
     }
+    setSubmitLoading(false);
   }
 
   const handleAddTeam = async()=>{
+    setSubmitLoading(true);
+    if(!selectedTournament) {
+      alert("Please select a tournament");
+      return;
+    }
     if(!teamName) {
       alert("Please fill the team name");
       return;
@@ -119,52 +139,65 @@ const TeamsPortal = () => {
     } catch (error) {
       console.log(error);
     }
+    setSubmitLoading(false);
   }
+  const LoadingSpinner = () => (
+    <div className="flex justify-center items-center">
+      <div className="animate-spin rounded-full h-8 w-8 border-t-2 border-b-2 border-blue-500"></div>
+    </div>
+  );
 
   return (
     <div className="min-h-screen bg-gray-900 text-white p-6">
       <h1 className="text-3xl font-bold text-center mb-6">Team Portal</h1>
-      
       <div className="max-w-md mx-auto mb-6">
         <div className="mb-4">
           <label htmlFor="tournmant" className="block mb-1"> 
             Select Tournament where you want to add a player 
           </label>
-          <select 
-            onChange={(e)=>{setSelectedTournament(e.target.value);setSelectedTournamentOject(e.target.value)}} 
-            value={selectedTournament} 
-            name="tournmant" 
-            id="tournmant"
-            className="w-full p-2 bg-gray-700 rounded"
-          >
-            <option value={""}>Select Tournament</option>
-            {tournaments.map((tournament,key) => {return (
-              <option key={key} value={tournament.tournament_id}>
-                {tournament.tournament_name}
-              </option>
-            )})}
-          </select>
+          {loadingTournaments ? (
+            <LoadingSpinner />
+          ) : (
+            <select 
+              onChange={(e)=>{setSelectedTournament(e.target.value);setSelectedTournamentOject(e.target.value)}} 
+              value={selectedTournament} 
+              name="tournmant" 
+              id="tournmant"
+              className="w-full p-2 bg-gray-700 rounded"
+            >
+              <option value={""}>Select Tournament</option>
+              {tournaments.map((tournament,key) => {return (
+                <option key={key} value={tournament.tournament_id}>
+                  {tournament.tournament_name}
+                </option>
+              )})}
+            </select>
+          )}
         </div>
-        
+
         {selectedTournament && teams.length !== 0 && (
           <div className="mb-4">
             <label htmlFor="teams" className="block mb-1">
               Select Team where you want to add a player
             </label>
-            <select 
-              onChange={(e)=>{setSelectedTeam(e.target.value); setSelectedTeamObject(e.target.value);}} 
-              value={selectedTeam}  
-              name="teams" 
-              id="teams"
-              className="w-full p-2 bg-gray-700 rounded"
-            >
-              <option value={""}>Select Team</option>
-              {teams.map((team,key) => {return (
-                <option key={key} value={team.team_id}>
-                  {team.name}
-                </option>
-              )})}
-            </select>
+            {loadingTeams ? (
+              <LoadingSpinner />
+            ) : (
+              <select 
+                onChange={(e)=>{setSelectedTeam(e.target.value); setSelectedTeamObject(e.target.value);}} 
+                value={selectedTeam}  
+                name="teams" 
+                id="teams"
+                className="w-full p-2 bg-gray-700 rounded"
+              >
+                <option value={""}>Select Team</option>
+                {teams.map((team,key) => {return (
+                  <option key={key} value={team.team_id}>
+                    {team.name}
+                  </option>
+                )})}
+              </select>
+            )}
           </div>
         )}
         
@@ -223,6 +256,7 @@ const TeamsPortal = () => {
             )}
             <button 
               onClick={hanadleAddPlayer}
+              disabled={submitLoading}
               className="w-full bg-blue-600 p-2 rounded-lg hover:bg-blue-700"
             >
               Add Player
@@ -250,7 +284,8 @@ const TeamsPortal = () => {
             />
             <button 
               onClick={handleAddTeam}
-              className="w-full bg-blue-600 p-2 rounded-lg hover:bg-blue-700"
+              disabled={submitLoading}
+              className="w-full bg-blue-600 p-2 rounded-lg disabled:bg-gray-500 hover:bg-blue-700"
             >
               Add Team
             </button>
