@@ -79,9 +79,11 @@ def update_log(data: log_update, user: dict = Depends(get_current_user)):
     if info["inning"] == 1:
         if info["first_batting"] == "team_a": cursor.execute("update matches set team_a_score = team_a_score + %s, team_a_balls = team_a_balls + %s where match_id = %s", (data.bowler_score, 1 if data.ball_type == "legal" else 0, data.match_id))
         else: cursor.execute("update matches set team_b_score = team_b_score + %s, team_b_balls = team_b_balls + %s where match_id = %s", (data.bowler_score, 1 if data.ball_type == "legal" else 0, data.match_id))
+        if data.wicket_type: cursor.execute("update matches set team_a_wickets = team_a_wickets + 1 where match_id = %s", (data.match_id,))
     else:
         if info["first_batting"] == "team_a": cursor.execute("update matches set team_b_score = team_b_score + %s, team_b_balls = team_b_balls + %s where match_id = %s", (data.bowler_score, 1 if data.ball_type == "legal" else 0, data.match_id))
         else: cursor.execute("update matches set team_a_score = team_a_score + %s, team_a_balls = team_a_balls + %s where match_id = %s", (data.bowler_score, 1 if data.ball_type == "legal" else 0, data.match_id))
+        if data.wicket_type: cursor.execute("update matches set team_b_wickets = team_b_wickets + 1 where match_id = %s", (data.match_id,))
     conn.commit()
     cursor.close()
     conn.close()
