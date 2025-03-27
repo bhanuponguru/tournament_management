@@ -47,7 +47,7 @@ def get_match(match_id: int, user: dict = Depends(get_current_user)):
         raise HTTPException(status_code=404, detail="Match not found")
     return match
 
-@match.put("/{match_id}/score")
+@match.put("/score")
 def update_score(score: score_update, user: dict = Depends(get_current_user)):
     if user["role"] != "manager" and user["role"] != "organizer":
         raise HTTPException(status_code=403, detail="You are not a manager")
@@ -80,7 +80,7 @@ def update_score(score: score_update, user: dict = Depends(get_current_user)):
     conn.close()
     return {"message": "Score updated successfully"}
 
-@match.get("/{match_id}/log")
+@match.get("/log")
 def get_log(match_id: int, user: dict = Depends(get_current_user)):
     conn=get_connection()
     cursor = conn.cursor(dictionary=True)
