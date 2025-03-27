@@ -9,6 +9,7 @@ import TeamsPortal from './components/manager_portal/TeamsPortal';
 import TornmentPortal from './components/manager_portal/TornmentPortal';
 import {BrowserRouter, Routes, Route} from 'react-router-dom';
 import RoleProtectedRoutes from './utils/RoleProtectedRoutes';
+import Requestrole from './utils/Requestrole';
 function App() {
   return (
     <BrowserRouter>
@@ -21,6 +22,10 @@ function App() {
             <Route path="/manager_portal/score" element={<ScorePortal />} />
             <Route path="/manager_portal/teams" element={<TeamsPortal />} />
             <Route path="/manager_portal/tournmant" element={<TornmentPortal />} />
+          </Route>
+          <Route element={<RoleProtectedRoutes role1 = {"viewer"} />}>
+            <Route path="/request_role" element={<Requestrole />} />
+            
           </Route>
         </Route>
         <Route path="*" element={<NotFound/>} />

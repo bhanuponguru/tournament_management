@@ -3,7 +3,7 @@ import { useCookies } from "react-cookie";
 import { useState, useEffect } from "react";
 import axios from "../api/axios";
 
-const RoleProtectedRoutes = ({ role1, role2 }) => {
+const RoleProtectedRoutes = ({ role1, role2 = null }) => {
     const [cookies] = useCookies(["token"]);
     const [isAuthorized, setIsAuthorized] = useState(null);
 
@@ -37,7 +37,7 @@ const RoleProtectedRoutes = ({ role1, role2 }) => {
             </div>
         );
 
-    return isAuthorized ? <Outlet /> : <Navigate to="/login" />;
+    return isAuthorized ? <Outlet /> : <Navigate to="/request_role" />;
 };
 
 export default RoleProtectedRoutes;

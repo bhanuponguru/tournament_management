@@ -1,5 +1,6 @@
 import React from "react";
 import axios from "axios";
+import Navbar from "./utils/Navbar";
 import {useCookies} from 'react-cookie';
 const ScorePortal = () => {
   const [cookies,setCookie,removeCookie] = useCookies(["token"]);
@@ -31,6 +32,7 @@ const ScorePortal = () => {
   
   
   return (<div>
+    <Navbar />
     <h1>Score Portal</h1>
   </div>);
 };
