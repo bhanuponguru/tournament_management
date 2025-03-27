@@ -42,7 +42,7 @@ const Navbar = () => {
                 <div className="text-white text-2xl">Cricket Management</div>
                 <div className="flex gap-2">
                     <Link to="/" className="text-white hover:text-gray-300 p-2">Home</Link>
-                    <Link to="/matchs" className="text-white hover:text-gray-300 p-2">Matchs</Link>
+                    <Link to="/matches" className="text-white hover:text-gray-300 p-2">Matchs</Link>
                     <Link to="/points" className="text-white hover:text-gray-300 p-2">Point Table</Link>
                     {role === 'admin' ? null:
                     role === 'viewer' ? <Link to="/request_role" className="text-white hover:text-gray-300 p-2">Request Role</Link>: 
