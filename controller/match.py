@@ -22,7 +22,7 @@ class score_update(BaseModel):
     catch_by_id: int
     is_stumping: bool
 
-class toss_winner:
+class toss_winner(BaseModel):
     match_id: int
     team: str
 
