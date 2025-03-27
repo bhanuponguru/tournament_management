@@ -9,16 +9,18 @@ import TeamsPortal from './components/manager_portal/TeamsPortal';
 import TornmentPortal from './components/manager_portal/TornmentPortal';
 import {BrowserRouter, Routes, Route} from 'react-router-dom';
 import RoleProtectedRoutes from './utils/RoleProtectedRoutes';
+import PointsTable from './components/PointsTable';
 import Matches from './components/Matches';
 import Requestrole from './utils/Requestrole';
 function App() {
   return (
     <BrowserRouter>
       <Routes>
-        <Route path="/login" element={<Login />} />
+
         <Route element={<ProtectedRoutes />}>
           <Route path="/" element={<Home />} />
-          <Route path="/matches" element={<Matches />} />
+          <Route path="/matches" element={<Matches />} /> 
+          <Route path="/pointstable" element={<PointsTable />} /> 
           <Route element={<RoleProtectedRoutes role1 = {"manager"} role2 = {"organizer"} />}>
             <Route path="/manager_portal" element={<ManagerPortalHome />} />
             <Route path="/manager_portal/score" element={<ScorePortal />} />
@@ -29,6 +31,7 @@ function App() {
             <Route path="/request_role" element={<Requestrole />} />
           </Route>
         </Route>
+        <Route path="/login" element={<Login />} />
         <Route path="*" element={<NotFound/>} />
       </Routes>
     </BrowserRouter>

@@ -9,11 +9,6 @@ const ProtectedRoutes = () => {
 
     useEffect(() => {
         const verifyToken = async () => {
-            if (!cookies.token) {
-                setIsAuthenticated(false);
-                return;
-            }
-
             try {
                 await axios.get("/users/verify", {
                     headers: { Authorization: `Bearer ${cookies.token}` },
@@ -26,7 +21,9 @@ const ProtectedRoutes = () => {
         };
 
         verifyToken();
-    }, [cookies.token]);
+
+        
+    }, []);
 
     if (isAuthenticated === null) {
         return (
