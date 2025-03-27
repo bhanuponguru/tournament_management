@@ -29,24 +29,14 @@ match= APIRouter()
 def get_matches(tournament_id: int=None, user: dict = Depends(get_current_user)):
     conn=get_connection()
     cursor = conn.cursor(dictionary=True)
-    if not tournament_id: cursor.execute("SELECT * FROM matches")
-    else: cursor.execute("SELECT * FROM matches WHERE match_id IN (SELECT match_id FROM match_tournament_relation WHERE tournament_id = %s)", (tournament_id,))
+    if not tournament_id: cursor.execute("SELECT * FROM matches natural join (select team_id as team_a_id, name as team_a_name from team) as team_a natural join (select team_id as team_b_id, name as team_b_name from team) as team_b")
+    else: cursor.execute("SELECT * FROM matches natural join (select team_id as team_a_id, name as team_a_name from team) as team_a natural join (select team_id as team_b_id, name as team_b_name from team) as team_b WHERE match_id in (select match_id from match_tournament_relation where tournament_id = %s)", (tournament_id,))
     matches = cursor.fetchall()
+        
     cursor.close()
     conn.close()
     return matches
 
-@match.get("/{match_id}")
-def get_match(match_id: int, user: dict = Depends(get_current_user)):
-    conn=get_connection()
-    cursor = conn.cursor(dictionary=True)
-    cursor.execute("SELECT * FROM matches WHERE match_id = %s", (match_id,))
-    match = cursor.fetchone()
-    cursor.close()
-    conn.close()
-    if not match:
-        raise HTTPException(status_code=404, detail="Match not found")
-    return match
 
 @match.put("/score")
 def update_score(score: score_update, user: dict = Depends(get_current_user)):
@@ -89,7 +79,7 @@ def update_score(score: score_update, user: dict = Depends(get_current_user)):
 def get_log(match_id: int, user: dict = Depends(get_current_user)):
     conn=get_connection()
     cursor = conn.cursor(dictionary=True)
-    cursor.execute("SELECT * FROM log WHERE match_id = %s", (match_id,))
+    cursor.execute("SELECT * FROM log natural join (select player_id as batsman_id, name as batsman_name from player) as batsman natural join (select player_id as bowler_id, name as bowler_name from player) as bowler left join (select player_id as wicket_by_id, name as wicket_by_name from player) as wicket_by on log.wicket_by_id = wicket_by.wicket_by_id left join (select player_id as catch_by_id, name as catch_by_name from player) as catch_by on log.catch_by_id = catch_by.catch_by_id WHERE match_id = %s", (match_id,))
     log = cursor.fetchall()
     cursor.close()
     conn.close()
@@ -99,20 +89,11 @@ def get_log(match_id: int, user: dict = Depends(get_current_user)):
 def get_matches_today(user: dict = Depends(get_current_user)):
     conn=get_connection()
     cursor = conn.cursor(dictionary=True)
-    cursor.execute("SELECT * FROM matches WHERE date_time >= CURDATE() AND date_time < CURDATE() + INTERVAL 1 DAY")
+    cursor.execute("SELECT * FROM matches natural join (select team_id as team_a_id, name as team_a_name from team) as team_a natural join (select team_id as team_b_id, name as team_b_name from team) as team_b WHERE date_time >= CURDATE() AND date_time < CURDATE() + INTERVAL 1 DAY")
     matches= cursor.fetchall()
-    matches2=[]
-    for match in matches:
-        cursor.execute("select * from team where team_id = %s", (match["team_a"],))
-        team_a = cursor.fetchone()
-        cursor.execute("select * from team where team_id = %s", (match["team_b"],))
-        team_b = cursor.fetchone()
-        match["team_a"] = team_a
-        match["team_b"] = team_b
-        matches2.append(match)
     cursor.close()
     conn.close()
-    return matches2
+    return matches
 
 @match.post("/create")
 def create_match(data: match_create, user: dict = Depends(get_current_user)):
