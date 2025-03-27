@@ -26,12 +26,30 @@ const ScorePortal = () => {
   const [loadingMatches, setLoadingMatches] = useState(false);
   const [loadingTeams, setLoadingTeams] = useState(false);
   const [submitLoading, setSubmitLoading] = useState(false);
+  const [loadingMatchFinish, setLoadingMatchFinish] = useState(false);
 
   const LoadingSpinner = () => (
     <div className="flex justify-center items-center">
       <div className="animate-spin rounded-full h-8 w-8 border-t-2 border-b-2 border-blue-500"></div>
     </div>
   );
+  
+  const handleFinish = async () => 
+  {
+    setLoadingMatchFinish(true);
+    if(selectedMatchObj.inning === 1)
+    {
+      axios.put('/matches/update_inning',{match_id:selectedMatch},{headers:{"Authorization":`Bearer ${cookies.token}`}}).catch((error)=>{console.log(error)})
+      window.location.reload();
+      setLoadingMatchFinish(false);
+    }
+    else 
+    {
+      axios.put('/matches/complete',{match_id:selectedMatch},{headers:{"Authorization":`Bearer ${cookies.token}`}}).catch((error)=>{console.log(error)})
+      window.location.reload();
+      setLoadingMatchFinish(false);
+    }
+  }
 
   useLayoutEffect(()=>{
     const getTournaments = async () => {
@@ -68,6 +86,14 @@ const ScorePortal = () => {
       console.log(error);
     }
     setSubmitLoading(false);
+    setBatsman("");
+    setBowler("");
+    setBallType("");
+    setBatsmanScore("");
+    setBowlerScore("");
+    setWicketType("");
+    setWicketBy("");
+    setCatchBy("");
   }
 
   useEffect(()=>{
@@ -172,13 +198,16 @@ const ScorePortal = () => {
             >
               <option value="">Select an option</option>
               {matches.map((item,key)=>{
+                if(item.outcome !== null)
+                  return null
                 return <option key={key} value={item.match_id}>{item.team_a_name} vs {item.team_b_name}</option>
               })}
             </select>
           </div>
         :<p className="text-red-400">No Matches available</p>)}
-
-        {selectedMatch !== "" && <div>
+        {selectedTournament && selectedMatch !== "" && <p className="text-center text-xl text-gray-300">{selectedMatchObj.team_a_name} vs {selectedMatchObj.team_b_name}</p>}
+        {selectedTournament && selectedMatch !== "" && <p className="text-center text-xl text-gray-300">{selectedMatchObj.inning === 1 ? "First Inning" : "Second Inning"}</p>}
+        {selectedTournament && selectedMatch !== "" && <div>
           <label htmlFor="tossWinner" className="block mb-1">Select Toss Winner</label>
           <select 
             onChange={(e)=>{
@@ -199,7 +228,7 @@ const ScorePortal = () => {
           </select>
         </div>}
 
-        { selectedMatch!==''&& selectedMatchObj.toss_winner !== null && 
+        {selectedTournament && selectedMatch!==''&& selectedMatchObj.toss_winner !== null && 
         <div>
           <label htmlFor="batting team" className="block mb-1">Choose Batting Team</label>
           <select 
@@ -221,7 +250,7 @@ const ScorePortal = () => {
           </select>
         </div>}
 
-        {selectedMatch !== "" && selectedMatchObj.first_batting !== null && (loadingTeams ? (
+        {selectedTournament && selectedMatch !== "" && selectedMatchObj.first_batting !== null && (loadingTeams ? (
           <LoadingSpinner />
         ) : (
           <div className="flex space-x-4">
@@ -508,6 +537,13 @@ const ScorePortal = () => {
             {submitLoading ? <LoadingSpinner /> : 'Submit Score'}
           </button>
         }
+        {selectedTournament && selectedMatch && <button 
+          className="w-full bg-blue-600 p-2 rounded-lg hover:bg-blue-700 disabled:bg-gray-500 mt-4 text-white flex justify-center items-center" 
+          onClick={handleFinish}
+          disabled={loadingMatchFinish}
+        >
+          {loadingMatchFinish ? <LoadingSpinner /> : (selectedMatchObj.inning === 1 ? "Finish inning" : "Finish match")}
+        </button>}
       </div>
     </div>
   );
