@@ -37,3 +37,17 @@ def create_player(data: Player, user: dict = Depends(get_current_user)):
     cursor.close()
     conn.close()
     return {"message": "Player created successfully"}
+
+@player.get("/")
+def get_player(player_id: int=None, user: dict = Depends(get_current_user)):
+    conn=get_connection()
+    cursor = conn.cursor(dictionary=True)
+    if player_id:
+        cursor.execute("SELECT * FROM player WHERE player_id = %s", (player_id,))
+    else:
+        cursor.execute("SELECT * FROM player")
+    players = cursor.fetchall()
+    cursor.close()
+    conn.close()
+    return players if len(players) > 1 else players[0]
+
