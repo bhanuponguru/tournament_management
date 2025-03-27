@@ -26,10 +26,11 @@ class score_update(BaseModel):
 match= APIRouter()
 
 @match.get("/")
-def get_matches(user: dict = Depends(get_current_user)):
+def get_matches(tournament_id: int=None, user: dict = Depends(get_current_user)):
     conn=get_connection()
     cursor = conn.cursor(dictionary=True)
-    cursor.execute("SELECT * FROM matches")
+    if not tournament_id: cursor.execute("SELECT * FROM matches")
+    else: cursor.execute("SELECT * FROM matches WHERE match_id IN (SELECT match_id FROM match_tournament_relation WHERE tournament_id = %s)", (tournament_id,))
     matches = cursor.fetchall()
     cursor.close()
     conn.close()
