@@ -73,6 +73,10 @@ def update_score(score: score_update, user: dict = Depends(get_current_user)):
     team_b= cursor.fetchone()
     if not team_a or not team_b or team_a["match_id"] != match_id or team_b["match_id"] != match_id:
         raise HTTPException(status_code=400, detail="Player does not belong to a team in this match")
+    cursor.execute("select manager_id, organizer_id from tournament where tournament_id = (select tournament_id from match_tournament_relation where match_id = %s)", (match_id,))
+    tournament = cursor.fetchone()
+    if user["role"] == "manager" and user["user_id"] != tournament["manager_id"]: raise HTTPException(status_code=403, detail="You are not a manager of this tournament")
+    if user["role"] == "organizer" and user["user_id"] != tournament["organizer_id"]: raise HTTPException(status_code=403, detail="You are not an organizer of this tournament")
     #update score
     cursor.execute("INSERT INTO log (match_id, batsman_id, bowler_id, bowler_score, batsman_score, ball_type, wicket_type, wicket_by_id, catch_by_id, is_stumping) VALUES (%s, %s, %s, %s, %s, %s, %s, %s, %s, %s)", (match_id, score.batsman_id, score.bowler_id, score.bowler_score, score.batsman_score, score.ball_type, score.wicket_type, score.wicket_by_id, score.catch_by_id, score.is_stumping))
     conn.commit()
@@ -92,8 +96,6 @@ def get_log(match_id: int, user: dict = Depends(get_current_user)):
 
 @match.get("/today")
 def get_matches_today(user: dict = Depends(get_current_user)):
-    if user['role'] != 'manager' and user['role'] != 'organizer':
-        raise HTTPException(status_code=403, detail="You are not a manager")
     conn=get_connection()
     cursor = conn.cursor(dictionary=True)
     cursor.execute("SELECT * FROM matches WHERE date_time >= CURDATE() AND date_time < CURDATE() + INTERVAL 1 DAY")
