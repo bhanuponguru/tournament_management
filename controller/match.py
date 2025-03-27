@@ -14,9 +14,9 @@ class match_create(BaseModel):
 
 class log_update(BaseModel):
     match_id: int
-    batsman_id: int = 0
+    batsman_id: int
     bowler_id: int
-    bowler_score: int = 0
+    bowler_score: int
     batsman_score: int
     ball_type: str
     wicket_type: str = None
@@ -66,7 +66,7 @@ def update_log(data: log_update, user: dict = Depends(get_current_user)):
         raise HTTPException(status_code=403, detail="You are not a manager of this tournament")
     if user["role"] == "organizer" and user["user_id"] != tournament["organizer_id"]:
         raise HTTPException(status_code=403, detail="You are not an organizer of this tournament")
-    cursor.execute("INSERT INTO log (match_id, batsman_id, bowler_id, bowler_score, batsman_score, ball_type, wicket_type, wicket_by_id, catch_by_id, is_stumping) VALUES (%s, %s, %s, %s, %s, %s, %s, %s, %s, %s)", (data.match_id, data.batsman_id, data.bowler_id, data.bowler_score, data.batsman_score, data.ball_type, data.wicket_type, data.wicket_by_id, data.catch_by_id, data.is_stumping))
+    cursor.execute("INSERT INTO log (match_id, batsman_id, bowler_id, bowler_score, batsman_score, ball_type, wicket_type, wicket_by_id, catch_by_id, is_stumping) VALUES (%s, %s, %s, %s, %s, %s, %s, %s, %s, %s)", (data.match_id, data.batsman_id, data.bowler_id, data.bowler_score, data.batsman_score, data.ball_type, data.wicket_type or None, data.wicket_by_id or None, data.catch_by_id or None, data.is_stumping))
     conn.commit()
     cursor.close()
     conn.close()
