@@ -12,8 +12,10 @@ class match_create(BaseModel):
     tournament_id: int
     
 
-class score_update(BaseModel):
+class log_update(BaseModel):
     match_id: int
+    batsman_id: int
+    bowler_id: int
     bowler_score: int
     batsman_score: int
     ball_type: str
@@ -48,42 +50,27 @@ def get_matches(tournament_id: int=None, user: dict = Depends(get_current_user))
     return matches
 
 
-@match.put("/score")
-def update_score(score: score_update, user: dict = Depends(get_current_user)):
+@match.put("/log")
+def update_log(data: log_update, user: dict = Depends(get_current_user)):
     if user["role"] != "manager" and user["role"] != "organizer":
         raise HTTPException(status_code=403, detail="You are not a manager")
     conn=get_connection()
     cursor = conn.cursor(dictionary=True)
-    match_id=score.match_id
-    cursor.execute("SELECT * FROM matches WHERE match_id = %s", (match_id,))
+    cursor.execute("SELECT * FROM matches WHERE match_id = %s", (data.match_id,))
     match = cursor.fetchone()
     if not match:
         raise HTTPException(status_code=404, detail="Match not found")
-    #fetch batsman and bowler and check if they belong to a team in this match
-    cursor.execute("SELECT * FROM player WHERE player_id = %s", (score.batsman_id,))
-    batsman = cursor.fetchone()
-    cursor.execute("SELECT * FROM player WHERE player_id = %s", (score.bowler_id,))
-    bowler = cursor.fetchone()
-    if not batsman or not bowler:
-        raise HTTPException(status_code=404, detail="Player not found")
-    cursor.execute("SELECT * FROM team WHERE team_id = %s", (batsman["team_id"],
-    ))
-    team_a= cursor.fetchone()
-    cursor.execute("SELECT * FROM team WHERE team_id = %s", (bowler["team_id"],
-    ))
-    team_b= cursor.fetchone()
-    if not team_a or not team_b or team_a["match_id"] != match_id or team_b["match_id"] != match_id:
-        raise HTTPException(status_code=400, detail="Player does not belong to a team in this match")
-    cursor.execute("select manager_id, organizer_id from tournament where tournament_id = (select tournament_id from match_tournament_relation where match_id = %s)", (match_id,))
+    cursor.execute("SELECT * FROM tournament WHERE tournament_id = (select tournament_id from match_tournament_relation where match_id = %s)", (data.match_id,))
     tournament = cursor.fetchone()
-    if user["role"] == "manager" and user["user_id"] != tournament["manager_id"]: raise HTTPException(status_code=403, detail="You are not a manager of this tournament")
-    if user["role"] == "organizer" and user["user_id"] != tournament["organizer_id"]: raise HTTPException(status_code=403, detail="You are not an organizer of this tournament")
-    #update score
-    cursor.execute("INSERT INTO log (match_id, batsman_id, bowler_id, bowler_score, batsman_score, ball_type, wicket_type, wicket_by_id, catch_by_id, is_stumping) VALUES (%s, %s, %s, %s, %s, %s, %s, %s, %s, %s)", (match_id, score.batsman_id, score.bowler_id, score.bowler_score, score.batsman_score, score.ball_type, score.wicket_type, score.wicket_by_id, score.catch_by_id, score.is_stumping))
+    if user["role"] == "manager" and user["user_id"] != tournament["manager_id"]:
+        raise HTTPException(status_code=403, detail="You are not a manager of this tournament")
+    if user["role"] == "organizer" and user["user_id"] != tournament["organizer_id"]:
+        raise HTTPException(status_code=403, detail="You are not an organizer of this tournament")
+    cursor.execute("INSERT INTO log (match_id, batsman_id, bowler_id, bowler_score, batsman_score, ball_type, wicket_type, wicket_by_id, catch_by_id, is_stumping) VALUES (%s, %s, %s, %s, %s, %s, %s, %s, %s, %s)", (data.match_id, data.batsman_id, data.bowler_id, data.bowler_score, data.batsman_score, data.ball_type, data.wicket_type, data.wicket_by_id, data.catch_by_id, data.is_stumping))
     conn.commit()
     cursor.close()
     conn.close()
-    return {"message": "Score updated successfully"}
+    return {"message": "Log updated successfully"}
 
 @match.get("/log")
 def get_log(match_id: int, user: dict = Depends(get_current_user)):
