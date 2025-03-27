@@ -22,6 +22,9 @@ class score_update(BaseModel):
     catch_by_id: int
     is_stumping: bool
 
+class toss_winner:
+    match_id: int
+    team: str
 
 match= APIRouter()
 
@@ -123,4 +126,25 @@ def create_match(data: match_create, user: dict = Depends(get_current_user)):
     conn.close()
     return {"message": "Match created successfully"}
 
+@match.put("/toss_winner")
+def update_toss_winner(data: toss_winner, user: dict = Depends(get_current_user)):
+    if user["role"] != "manager" and user["role"] != "organizer":
+        raise HTTPException(status_code=403, detail="You are not a manager")
+    conn=get_connection()
+    cursor = conn.cursor(dictionary=True)
+    cursor.execute("SELECT * FROM matches WHERE match_id = %s", (data.match_id,))
+    match = cursor.fetchone()
+    if not match:
+        raise HTTPException(status_code=404, detail="Match not found")
+    cursor.execute("SELECT * FROM tournament WHERE tournament_id = (select tournament_id from match_tournament_relation where match_id = %s)", (data.match_id,))
+    tournament = cursor.fetchone()
+    if user["role"] == "manager" and user["user_id"] != tournament["manager_id"]:
+        raise HTTPException(status_code=403, detail="You are not a manager of this tournament")
+    if user["role"] == "organizer" and user["user_id"] != tournament["organizer_id"]:
+        raise HTTPException(status_code=403, detail="You are not an organizer of this tournament")
+    cursor.execute("UPDATE matches SET toss_winner = %s WHERE match_id = %s", (data.team, data.match_id))
+    conn.commit()
+    cursor.close()
+    conn.close()
+    return {"message": "Toss winner updated successfully"}
 
