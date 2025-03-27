@@ -4,3 +4,4 @@ mysql-connector-python
 pydantic
 pyjwt
 dotenv
+bcrypt
