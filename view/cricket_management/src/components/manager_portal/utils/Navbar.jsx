@@ -9,7 +9,7 @@ const Navbar = () => {
   };
 
   return (
-    <nav className="fixed top-0 left-0 w-full z-50 bg-gray-900 shadow-lg">
+    <nav className="w-full z-50 bg-gray-900 shadow-lg">
       <div className="container mx-auto flex justify-between items-center py-4 px-6">
         <div>
           <Link to="/" className="text-white text-2xl font-bold tracking-wide hover:text-gray-300 transition">
