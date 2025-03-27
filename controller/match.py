@@ -14,14 +14,14 @@ class match_create(BaseModel):
 
 class log_update(BaseModel):
     match_id: int
-    batsman_id: int
+    batsman_id: int = 0
     bowler_id: int
-    bowler_score: int
+    bowler_score: int = 0
     batsman_score: int
     ball_type: str
-    wicket_type: str
-    wicket_by_id: int
-    catch_by_id: int
+    wicket_type: str = None
+    wicket_by_id: int = None
+    catch_by_id: int = None
     is_stumping: bool
 
 class toss_winner(BaseModel):
