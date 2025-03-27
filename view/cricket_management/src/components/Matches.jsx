@@ -61,9 +61,9 @@ const Matches = () => {
     },[selectedTournament])
     
   return (
-    <div className="min-h-screen bg-gray-900 text-white p-6">
+    <div className="min-h-screen bg-gray-900 text-white ">
         <Navbar />
-        <h1 className="text-3xl font-bold text-center mb-6 text-white">Tournaments</h1>
+        <h1 className="text-3xl font-bold text-center mt-5 mb-6 text-white">Tournaments</h1>
         
         <div className="max-w-7xl mx-auto">
             <div className="mb-4">
