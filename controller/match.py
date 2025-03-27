@@ -26,6 +26,13 @@ class toss_winner(BaseModel):
     match_id: int
     team: str
 
+class first_batting(BaseModel):
+    match_id: int
+    team: str
+
+class inning_update(BaseModel):
+    match_id: int
+
 match= APIRouter()
 
 @match.get("/")
@@ -148,3 +155,46 @@ def update_toss_winner(data: toss_winner, user: dict = Depends(get_current_user)
     conn.close()
     return {"message": "Toss winner updated successfully"}
 
+@match.put("/first_batting")
+def update_first_batting(data: first_batting, user: dict = Depends(get_current_user)):
+    if user["role"] != "manager" and user["role"] != "organizer":
+        raise HTTPException(status_code=403, detail="You are not a manager")
+    conn=get_connection()
+    cursor = conn.cursor(dictionary=True)
+    cursor.execute("SELECT * FROM matches WHERE match_id = %s", (data.match_id,))
+    match = cursor.fetchone()
+    if not match:
+        raise HTTPException(status_code=404, detail="Match not found")
+    cursor.execute("SELECT * FROM tournament WHERE tournament_id = (select tournament_id from match_tournament_relation where match_id = %s)", (data.match_id,))
+    tournament = cursor.fetchone()
+    if user["role"] == "manager" and user["user_id"] != tournament["manager_id"]:
+        raise HTTPException(status_code=403, detail="You are not a manager of this tournament")
+    if user["role"] == "organizer" and user["user_id"] != tournament["organizer_id"]:
+        raise HTTPException(status_code=403, detail="You are not an organizer of this tournament")
+    cursor.execute("UPDATE matches SET first_batting = %s WHERE match_id = %s", (data.team, data.match_id))
+    conn.commit()
+    cursor.close()
+    conn.close()
+    return {"message": "First batting updated successfully"}
+
+@match.put("/update_inning")
+def update_inning(data: inning_update, user: dict = Depends(get_current_user)):
+    if user["role"] != "manager" and user["role"] != "organizer":
+        raise HTTPException(status_code=403, detail="You are not a manager")
+    conn=get_connection()
+    cursor = conn.cursor(dictionary=True)
+    cursor.execute("SELECT * FROM matches WHERE match_id = %s", (data.match_id,))
+    match = cursor.fetchone()
+    if not match:
+        raise HTTPException(status_code=404, detail="Match not found")
+    cursor.execute("SELECT * FROM tournament WHERE tournament_id = (select tournament_id from match_tournament_relation where match_id = %s)", (data.match_id,))
+    tournament = cursor.fetchone()
+    if user["role"] == "manager" and user["user_id"] != tournament["manager_id"]:
+        raise HTTPException(status_code=403, detail="You are not a manager of this tournament")
+    if user["role"] == "organizer" and user["user_id"] != tournament["organizer_id"]:
+        raise HTTPException(status_code=403, detail="You are not an organizer of this tournament")
+    cursor.execute("UPDATE matches SET inning = 2 WHERE match_id = %s", (data.match_id,))
+    conn.commit()
+    cursor.close()
+    conn.close()
+    return {"message": "Inning updated successfully"}
