@@ -72,7 +72,8 @@ const PointsTable = () => {
     return (
         <div className="bg-gray-900 text-white min-h-screen">
             <Navbar />
-            <div className="p-4">
+            <h1 className="text-3xl font-bold text-center mt-5  text-white">Tournaments</h1>
+            <div className="max-w-7xl mx-auto">
                 <div className="mb-4">
                     <label htmlFor="filters" className="block mb-1 text-gray-300">Filters</label>
                     <select
