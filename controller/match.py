@@ -115,10 +115,12 @@ def complete_match(data: match_update, user: dict = Depends(get_current_user)):
     cursor.execute("update team set matches_played = matches_played + 1 where team_id = %s", (match["team_a_id"],))
     cursor.execute("update team set matches_played = matches_played + 1 where team_id = %s", (match["team_b_id"],))
     if match["team_a_score"] > match["team_b_score"]:
-        cursor.execute("update team set points = points + 2 where team_id = %s", (match["team_a_id"],))
+        cursor.execute("update team set points = points + 2, wins = wins + 1 where team_id = %s", (match["team_a_id"],))
+        cursor.execute("update team set losses = losses + 1 where team_id = %s", (match["team_b_id"],))
         cursor.execute("update matches set outcome = %s where match_id = %s", ("team_a", data.match_id))
     elif match["team_a_score"] < match["team_b_score"]:
-        cursor.execute("update team set points = points + 2 where team_id = %s", (match["team_b_id"],))
+        cursor.execute("update team set points = points + 2, wins = wins + 1 where team_id = %s", (match["team_b_id"],))
+        cursor.execute("update team set losses = losses + 1 where team_id = %s", (match["team_a_id"],))
         cursor.execute("update matches set outcome = %s where match_id = %s", ("team_b", data.match_id))
     else:
         cursor.execute("update team set points = points + 1 where team_id = %s", (match["team_a_id"],))
