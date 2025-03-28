@@ -243,7 +243,7 @@ def update_inning(data: match_update, user: dict = Depends(get_current_user)):
     conn.close()
     return {"message": "Inning updated successfully"}
 
-@match.get('/batsman_statistics')
+@match.get('/player_statistics')
 def get_batsman_statistics(match_id: int):
     conn=get_connection()
     cursor = conn.cursor(dictionary=True)
