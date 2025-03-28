@@ -53,3 +53,24 @@ def get_all_tournaments(user: dict = Depends(get_current_user)):
     cursor.close()
     conn.close()
     return tournaments
+
+@tournament.get("/players")
+def get_players_in_tournament(tournament_id: int, user: dict = Depends(get_current_user)):
+    conn = get_connection()
+    cursor = conn.cursor(dictionary=True)
+    cursor.execute("SELECT * FROM tournament WHERE tournament_id = %s", (tournament_id,))
+    tournament = cursor.fetchone()
+    if not tournament:
+        cursor.close()
+        conn.close()
+        raise HTTPException(status_code=status.HTTP_400_BAD_REQUEST, detail="Tournament not found")
+    cursor.execute("SELECT * FROM team WHERE tournament_id = %s", (tournament_id,))
+    teams = cursor.fetchall()
+    players = []
+    for team in teams:
+        cursor.execute("SELECT * FROM player WHERE team_id = %s", (team["team_id"],))
+        players += cursor.fetchall()
+    cursor.close()
+    conn.close()
+    return players
+
