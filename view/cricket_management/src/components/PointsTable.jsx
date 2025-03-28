@@ -65,33 +65,45 @@ const PointsTable = () => {
 
     const LoadingSpinner = () => (
         <div className="flex justify-center items-center">
-            <div className="animate-spin rounded-full h-8 w-8 border-t-2 border-b-2 border-blue-500"></div>
+            <div className="animate-spin rounded-full h-8 w-8 border-t-2 border-b-2 border-white"></div>
         </div>
     );
 
     return (
-        <div className="bg-gray-900 text-white min-h-screen">
-            <Navbar />
-            <h1 className="text-3xl font-bold text-center mt-5  text-white">Tournaments</h1>
-            <div className="max-w-7xl mx-auto">
-                <div className="mb-4">
-                    <label htmlFor="filters" className="block mb-1 text-gray-300">Filters</label>
+        <div
+            className="min-h-screen bg-[url(https://c0.wallpaperflare.com/path/967/82/462/australia-richmond-melbourne-cricket-ground-cricket-371772744fa62261f54850a915da5c9b.jpg)] bg-gray-900 text-white p-6 bg-cover bg-center"
+        >
+            <div className="absolute inset-0 bg-black/50"></div>
+            
+            <div className="relative z-30">
+                <Navbar />
+            </div>
+            
+            <div className="relative z-10 max-w-7xl mx-auto pt-20">
+                <h1 className="text-4xl font-bold text-center mb-8 text-white">Tournaments</h1>
+                
+                <div className="mb-6">
+                    <label htmlFor="filters" className="block mb-2 text-sm font-semibold">Filter Tournaments</label>
                     <select
                         onChange={(e) => setFilter(e.target.value)}
                         value={filter}
                         name="filters"
                         id="filters"
-                        className="w-full p-2 bg-gray-800 text-white border border-gray-700 rounded"
+                        className="w-full p-3 bg-white/20 rounded-lg border border-white/30 focus:ring-2 focus:ring-white/50 transition-all duration-300 text-white"
                     >
-                        <option value="all">All</option>
-                        <option value="upcoming">Upcoming</option>
-                        <option value="ongoing">Ongoing</option>
-                        <option value="completed">Completed</option>
+                        <option value="all" className="bg-gray-900 text-white">All Tournaments</option>
+                        <option value="upcoming" className="bg-gray-900 text-white">Upcoming Tournaments</option>
+                        <option value="ongoing" className="bg-gray-900 text-white">Ongoing Tournaments</option>
+                        <option value="completed" className="bg-gray-900 text-white">Completed Tournaments</option>
                     </select>
                 </div>
 
-                {loadingTournaments ? <LoadingSpinner /> : (
-                    <div className="grid grid-cols-1 sm:grid-cols-2 md:grid-cols-3 lg:grid-cols-4 gap-4">
+                {loadingTournaments ? (
+                    <div className="flex justify-center items-center h-64">
+                        <LoadingSpinner />
+                    </div>
+                ) : (
+                    <div className="grid grid-cols-1 sm:grid-cols-2 md:grid-cols-3 lg:grid-cols-4 gap-6">
                         {tournaments.map((tournament) => {
                             if (
                                 (filter === "upcoming" && new Date() < new Date(tournament.start_date)) ||
@@ -100,13 +112,18 @@ const PointsTable = () => {
                                 filter === "all"
                             ) {
                                 return (
-                                    <div key={tournament.tournament_id} className="bg-gray-800 p-4 rounded-lg hover:bg-gray-700 transition-colors">
-                                        <h2 className="text-xl font-semibold">{tournament.tournament_name}</h2>
-                                        <h3 className="text-gray-400">{tournament.tournament_format}</h3>
-                                        <p className="text-gray-500">{tournament.start_date} to {tournament.end_date}</p>
+                                    <div 
+                                        key={tournament.tournament_id} 
+                                        className="bg-white/10 backdrop-blur-sm border border-white/30 rounded-lg p-5 hover:bg-white/20 transition-all duration-300 transform hover:-translate-y-1"
+                                    >
+                                        <h2 className="text-xl font-semibold mb-2 text-white">{tournament.tournament_name}</h2>
+                                        <h3 className="text-white/70 mb-1">{tournament.tournament_format}</h3>
+                                        <p className="text-white/60 mb-4">
+                                            from {tournament.start_date} to {tournament.end_date}
+                                        </p>
                                         <button
                                             onClick={() => setSelectedTournament(tournament.tournament_id)}
-                                            className="w-full bg-blue-600 p-2 rounded-lg hover:bg-blue-700"
+                                            className="w-full bg-gradient-to-r from-indigo-600 to-purple-600 p-3 rounded-lg hover:from-indigo-700 hover:to-purple-700 transition-all duration-300 transform hover:-translate-y-1 active:translate-y-0 font-semibold"
                                         >
                                             Show Table
                                         </button>
@@ -120,41 +137,63 @@ const PointsTable = () => {
             </div>
 
             {showLeaderboard && (
-                <div className="fixed inset-0 flex items-center justify-center bg-black bg-opacity-50">
-                    <div className="bg-gray-800 p-6 rounded-lg w-3/4 max-w-2xl">
-                        <h1 className="text-2xl mb-4">Leaderboard</h1>
-                        {loadingTable ? <LoadingSpinner /> : (
-                            table.length > 0 ? (
-                                <table className="w-full text-left border-collapse">
-                                    <thead>
-                                        <tr className="bg-gray-700">
-                                            <th className="p-2">Team</th>
-                                            <th className="p-2">NRR</th>
-                                            <th className="p-2">Matches Played</th>
-                                            <th className="p-2">Points</th>
-                                        </tr>
-                                    </thead>
-                                    <tbody>
-                                        {table.map((team, index) => (
-                                            <tr key={index} className="border-b border-gray-600">
-                                                <td className="p-2">{team.name}</td>
-                                                <td className="p-2">{team.nrr}</td>
-                                                <td className="p-2">{team.matchesPlayed}</td>
-                                                <td className="p-2">{team.points}</td>
-                                            </tr>
-                                        ))}
-                                    </tbody>
-                                </table>
+                <div className="fixed inset-0 flex items-center justify-center bg-black/70 z-50">
+                    <div className="bg-white/10 backdrop-blur-md border border-white/30 rounded-3xl overflow-hidden shadow-2xl w-3/4 max-w-3xl">
+                        <div className="p-6">
+                            <h1 className="text-3xl font-bold mb-6 text-center text-white">Leaderboard</h1>
+                            
+                            {loadingTable ? (
+                                <div className="flex justify-center items-center h-40">
+                                    <LoadingSpinner />
+                                </div>
                             ) : (
-                                <p className="text-center text-gray-400">No teams in the tournament</p>
-                            )
-                        )}
-                        <button
-                            onClick={() => setShowLeaderboard(false)}
-                            className="mt-4 w-full bg-red-600 p-2 rounded-lg hover:bg-red-700"
-                        >
-                            Close
-                        </button>
+                                table.length > 0 ? (
+                                    <div className="overflow-x-auto">
+                                        <table className="w-full text-left">
+                                            <thead>
+                                                <tr className="border-b border-white/20">
+                                                    <th className="p-3 text-white/90 font-semibold">Team</th>
+                                                    <th className="p-3 text-white/90 font-semibold">NRR</th>
+                                                    <th className="p-3 text-white/90 font-semibold">Matches</th>
+                                                    <th className="p-3 text-white/90 font-semibold">Points</th>
+                                                </tr>
+                                            </thead>
+                                            <tbody>
+                                                {table.map((team, index) => (
+                                                    <tr 
+                                                        key={index} 
+                                                        className={`border-b border-white/10 ${index === 0 ? 'bg-gradient-to-r from-indigo-900/30 to-purple-900/30' : ''}`}
+                                                    >
+                                                        <td className="p-3 text-white">
+                                                            {index === 0 && (
+                                                                <span className="inline-block mr-2 text-yellow-400">🏆</span>
+                                                            )}
+                                                            {team.name}
+                                                        </td>
+                                                        <td className="p-3 text-white/80">{team.nrr}</td>
+                                                        <td className="p-3 text-white/80">{team.matchesPlayed}</td>
+                                                        <td className="p-3 font-semibold text-white">{team.points}</td>
+                                                    </tr>
+                                                ))}
+                                            </tbody>
+                                        </table>
+                                    </div>
+                                ) : (
+                                    <div className="bg-white/5 border border-white/10 rounded-lg p-8 text-center">
+                                        <p className="text-white/70 text-lg">No teams in the tournament</p>
+                                    </div>
+                                )
+                            )}
+                            
+                            <div className="mt-6 flex justify-center">
+                                <button
+                                    onClick={() => setShowLeaderboard(false)}
+                                    className="px-8 py-3 bg-gradient-to-r from-indigo-600 to-purple-600 rounded-lg hover:from-indigo-700 hover:to-purple-700 transition-all duration-300 transform hover:-translate-y-1 active:translate-y-0 font-semibold"
+                                >
+                                    Close
+                                </button>
+                            </div>
+                        </div>
                     </div>
                 </div>
             )}
