@@ -5,7 +5,7 @@ import { Bell } from "lucide-react"
 import axios from '../api/axios';
 import NotificationBox from './NotificationBox';
 const Navbar = () => {
-    const [cookies,removeCookie] = useCookies(["token"]);
+    const [cookies,setCookie,removeCookie] = useCookies(["token"]);
     const [isShaking, setIsShaking] = useState(true)
     const [showNotification, setShowNotification] = useState(false)
     const [notifications, setNotifications] = useState([])  
@@ -35,6 +35,7 @@ const Navbar = () => {
     }, [role])
     const handleClick = () => {
         removeCookie("token");
+        window.location.href = "/login";
     }
     return (
         <div className="w-full fixted top-0 left-0">
@@ -42,8 +43,8 @@ const Navbar = () => {
                 <div className="text-white text-2xl">Cricket Management</div>
                 <div className="flex gap-2">
                     <Link to="/" className="text-white hover:text-gray-300 p-2">Home</Link>
-                    <Link to="/matchs" className="text-white hover:text-gray-300 p-2">Matchs</Link>
-                    <Link to="/points" className="text-white hover:text-gray-300 p-2">Point Table</Link>
+                    <Link to="/matches" className="text-white hover:text-gray-300 p-2">Matchs</Link>
+                    <Link to="/pointstable" className="text-white hover:text-gray-300 p-2">Point Table</Link>
                     {role === 'admin' ? null:
                     role === 'viewer' ? <Link to="/request_role" className="text-white hover:text-gray-300 p-2">Request Role</Link>: 
                     role === 'manager' ? <Link to="/manager_portal" className="text-white hover:text-gray-300 p-2">Managment Portal</Link>:<p className="text-white p-2" >Loading...</p>}

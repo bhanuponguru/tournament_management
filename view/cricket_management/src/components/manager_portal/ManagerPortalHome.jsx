@@ -1,4 +1,4 @@
-import { useState,useLayoutEffect } from "react";
+import { useState, useLayoutEffect } from "react";
 import { Link } from "react-router-dom";
 import axios from "../../api/axios";
 import { useCookies } from "react-cookie";
@@ -32,93 +32,208 @@ const ManagerPortalHome = () => {
       organizer_email: organizerEmail,
     };
 
-    axios.post("/tournaments/create", data, {
-      headers: {
-        Authorization: `Bearer ${cookies.token}`,
-      },
-    })
-    .then((response) => {
-      setShowTornamentForm(false);
-      setTournamentName("");
-      setTournamentFormat("T20");
-      setStartDate("");
-      setEndDate("");
-      setManagerEmail("");
-      setOrganizerEmail("");
-      alert(response.data.message);
-    })
-    .catch((error) => {
-      alert(error.response.data.detail);
-      console.log(error);
-    });
+    axios
+      .post("/tournaments/create", data, {
+        headers: {
+          Authorization: `Bearer ${cookies.token}`,
+        },
+      })
+      .then((response) => {
+        setShowTornamentForm(false);
+        setTournamentName("");
+        setTournamentFormat("T20");
+        setStartDate("");
+        setEndDate("");
+        setManagerEmail("");
+        setOrganizerEmail("");
+        alert(response.data.message);
+      })
+      .catch((error) => {
+        alert(error.response.data.detail);
+        console.log(error);
+      });
   };
 
   useLayoutEffect(() => {
-    axios.get("/tournaments", {
-      headers: {
-        Authorization: `Bearer ${cookies.token}`,
-      },
-    })
-    .then((response) => {
-      setAddTournmant(response.data.length === 0);
-    })
-    .catch((error) => console.log(error));
+    axios
+      .get("/tournaments", {
+        headers: {
+          Authorization: `Bearer ${cookies.token}`,
+        },
+      })
+      .then((response) => {
+        setAddTournmant(response.data.length === 0);
+      })
+      .catch((error) => console.log(error));
   }, []);
 
   return (
-    <div className="min-h-screen bg-gray-900 text-white p-6">
-      <h1 className="text-3xl font-bold text-center mb-6">Cricket Management Portal</h1>
-      <div className="flex flex-col items-center gap-4 mb-6">
-        {addTournmant ? (
-          <p className="text-red-400">No tournaments available. Please add one first.</p>
-        ) : (
-          <div className="flex flex-col gap-4 w-full max-w-md">
-            <Link to="/manager_portal/teams" className="bg-blue-600 px-6 py-3 rounded-lg text-center hover:bg-blue-700">
-              Add Teams
-              <p className="text-sm text-gray-300">Register teams for the tournament.</p>
-            </Link>
-            <Link to="/manager_portal/tournmant" className="bg-blue-600 px-6 py-3 rounded-lg text-center hover:bg-blue-700">
-              Add Matches
-              <p className="text-sm text-gray-300">Schedule matches for the tournament.</p>
-            </Link>
-            <Link to="/manager_portal/score" className="bg-blue-600 px-6 py-3 rounded-lg text-center hover:bg-blue-700">
-              Add Score
-              <p className="text-sm text-gray-300">Update match scores.</p>
-            </Link>
-          </div>
-        )}
-        <button onClick={() => setShowTornamentForm(true)} className="bg-green-600 px-6 py-3 rounded-lg hover:bg-green-700">
-          Add Tournament
-          <p className="text-sm text-gray-300">Create a new tournament.</p>
-        </button>
-      </div>
-      {showTornamentForm && (
-        <div className="fixed inset-0 flex items-center justify-center bg-black/80">
-          <div className="bg-gray-800 text-white p-6 rounded-lg w-96">
-            <div className="flex justify-end">
-              <button onClick={() => setShowTornamentForm(false)} className="text-gray-400 hover:text-white">&times;</button>
+    <div 
+      className="flex bg-[url(https://c0.wallpaperflare.com/path/967/82/462/australia-richmond-melbourne-cricket-ground-cricket-371772744fa62261f54850a915da5c9b.jpg)] items-center justify-center min-h-screen bg-gray-900 text-white p-6 bg-cover bg-center"
+
+    >
+      <div className="w-full max-w-5xl bg-white/10 rounded-3xl overflow-hidden shadow-2xl">
+        {/* Left Side - Background with Motivational Text */}
+        <div className="flex">
+          <div 
+            className="w-1/3  bg-[url(https://c0.wallpaperflare.com/path/967/82/462/australia-richmond-melbourne-cricket-ground-cricket-371772744fa62261f54850a915da5c9b.jpg)] relative bg-cover bg-center flex flex-col justify-center p-8 text-white"
+
+          >
+            <div className="absolute inset-0 bg-black/50"></div>
+            <div className="relative z-10">
+              <h1 className="text-3xl font-bold mb-4 text-center">
+                Tournament Management
+              </h1>
+              <p className="text-lg opacity-80 text-center">
+                Streamline your cricket tournament operations with precision and ease. 
+                Manage teams, matches, and scores seamlessly.
+              </p>
             </div>
-            <h2 className="text-xl font-semibold mb-4">Create Tournament</h2>
-            <label className="block mb-1">Tournament Name</label>
-            <input className="w-full p-2 mb-2 bg-gray-700 rounded" placeholder="Tournament Name" value={tournamentName} onChange={(e) => setTournamentName(e.target.value)} />
-            <label className="block mb-1">Tournament Format</label>
-            <select className="w-full p-2 mb-2 bg-gray-700 rounded" value={tournamentFormat} onChange={(e) => setTournamentFormat(e.target.value)}>
-              <option value="T20">T20</option>
-              <option value="ODI">ODI</option>
-              <option value="Test">Test</option>
-            </select>
-            <label className="block mb-1">Start Date</label>
-            <input className="w-full p-2 mb-2 bg-gray-700 rounded" type="date" value={startDate} onChange={(e) => setStartDate(e.target.value)} />
-            <label className="block mb-1">End Date</label>
-            <input className="w-full p-2 mb-2 bg-gray-700 rounded" type="date" value={endDate} onChange={(e) => setEndDate(e.target.value)} />
-            <label className="block mb-1">Manager Email</label>
-            <input className="w-full p-2 mb-2 bg-gray-700 rounded" placeholder="Manager Email" value={managerEmail} onChange={(e) => setManagerEmail(e.target.value)} />
-            <label className="block mb-1">Organizer Email</label>
-            <input className="w-full p-2 mb-4 bg-gray-700 rounded" placeholder="Organizer Email" value={organizerEmail} onChange={(e) => setOrganizerEmail(e.target.value)} />
-            <button onClick={handleSubmit} className="w-full bg-blue-600 p-2 rounded-lg hover:bg-blue-700">Add Tournament</button>
+          </div>
+
+          {/* Right Side - Main Content */}
+          <div className="w-2/3 bg-black/40 p-8">
+            <h1 className="text-4xl font-bold text-center mb-8 text-white">
+              Cricket Management Portal
+            </h1>
+
+            <div className="flex flex-col items-center gap-6">
+              {addTournmant ? (
+                <p className="text-red-400 text-lg">No tournaments available. Please add one first.</p>
+              ) : (
+                <div className="grid grid-cols-3 gap-6 w-full">
+                  {[
+                    { 
+                      title: "Add Teams", 
+                      description: "Register teams for the tournament.", 
+                      to: "/manager_portal/teams" 
+                    },
+                    { 
+                      title: "Add Matches", 
+                      description: "Schedule matches for the tournament.", 
+                      to: "/manager_portal/tournmant" 
+                    },
+                    { 
+                      title: "Add Score", 
+                      description: "Update match scores.", 
+                      to: "/manager_portal/score" 
+                    }
+                  ].map((item, index) => (
+                    <Link
+                      key={index}
+                      to={item.to}
+                      className="bg-black/20 border border-white/20 text-white px-6 py-5 rounded-xl text-center shadow-xl hover:bg-white/20 transition-all transform hover:-translate-y-2 duration-300"
+                    >
+                      <h2 className="text-xl font-bold mb-2">{item.title}</h2>
+                      <p className="text-sm text-gray-300">{item.description}</p>
+                    </Link>
+                  ))}
+                </div>
+              )}
+
+              <button
+                onClick={() => setShowTornamentForm(true)}
+                className="bg-black/20 border border-white/20 text-white px-8 py-4 rounded-xl shadow-xl hover:bg-white/20 transform transition-all duration-300 hover:-translate-y-1 active:translate-y-0"
+              >
+                <span className="text-lg font-bold">Add Tournament</span>
+                <p className="text-sm text-gray-300 mt-1">Create a new tournament</p>
+              </button>
+            </div>
+
+            {/* Tournament Form Modal */}
+            {showTornamentForm && (
+              <div className="fixed inset-0 flex items-center justify-center bg-black/80 z-50">
+                <div className="bg-white/10 border border-white/20 text-white p-8 rounded-2xl w-full max-w-md shadow-2xl">
+                  <div className="flex justify-between items-center mb-6">
+                    <h2 className="text-2xl font-bold text-white">Create Tournament</h2>
+                    <button
+                      onClick={() => setShowTornamentForm(false)}
+                      className="text-gray-400 hover:text-white text-3xl"
+                    >
+                      &times;
+                    </button>
+                  </div>
+
+                  <div className="space-y-4">
+                    {[
+                      { 
+                        label: "Tournament Name", 
+                        type: "text", 
+                        value: tournamentName, 
+                        onChange: setTournamentName,
+                        placeholder: "Enter tournament name" 
+                      },
+                      { 
+                        label: "Tournament Format", 
+                        type: "select", 
+                        value: tournamentFormat, 
+                        onChange: setTournamentFormat,
+                        options: ["T20", "ODI", "Test"] 
+                      },
+                      { 
+                        label: "Start Date", 
+                        type: "date", 
+                        value: startDate, 
+                        onChange: setStartDate 
+                      },
+                      { 
+                        label: "End Date", 
+                        type: "date", 
+                        value: endDate, 
+                        onChange: setEndDate 
+                      },
+                      { 
+                        label: "Manager Email", 
+                        type: "email", 
+                        value: managerEmail, 
+                        onChange: setManagerEmail,
+                        placeholder: "Enter manager email" 
+                      },
+                      { 
+                        label: "Organizer Email", 
+                        type: "email", 
+                        value: organizerEmail, 
+                        onChange: setOrganizerEmail,
+                        placeholder: "Enter organizer email" 
+                      }
+                    ].map((field, index) => (
+                      <div key={index}>
+                        <label className="block text-sm text-gray-300 mb-2">{field.label}</label>
+                        {field.type === 'select' ? (
+                          <select
+                            className="w-full p-3 bg-white/10 border border-white/20 rounded-xl text-white focus:outline-none focus:ring-2 focus:ring-white/30"
+                            value={field.value}
+                            onChange={(e) => field.onChange(e.target.value)}
+                          >
+                            {field.options.map(option => (
+                              <option className="text-black" key={option} value={option}>{option}</option>
+                            ))}
+                          </select>
+                        ) : (
+                          <input
+                            type={field.type}
+                            className="w-full p-3 bg-white/10 border border-white/20 rounded-xl text-white focus:outline-none focus:ring-2 focus:ring-white/30"
+                            value={field.value}
+                            onChange={(e) => field.onChange(e.target.value)}
+                            placeholder={field.placeholder}
+                          />
+                        )}
+                      </div>
+                    ))}
+
+                    <button
+                      onClick={handleSubmit}
+                      className="w-full bg-white/10 border border-white/20 text-white p-4 rounded-xl hover:bg-white/20 transition-all duration-300"
+                    >
+                      Add Tournament
+                    </button>
+                  </div>
+                </div>
+              </div>
+            )}
           </div>
         </div>
-      )}
+      </div>
     </div>
   );
 };
