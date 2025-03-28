@@ -25,7 +25,7 @@ def create_team(data: Team, user: dict = Depends(get_current_user)):
 
 
 @team.get("/")
-def get_teams(tournament_id: str = None, user: dict = Depends(get_current_user)):
+def get_teams(tournament_id: int = None, user: dict = Depends(get_current_user)):
     conn=get_connection()
     cursor = conn.cursor(dictionary=True)
     if tournament_id:
