@@ -111,7 +111,7 @@ const ManagerPortalHome = () => {
                     { 
                       title: "Add Matches", 
                       description: "Schedule matches for the tournament.", 
-                      to: "/manager_portal/tournmant" 
+                      to: "/manager_portal/tournament" 
                     },
                     { 
                       title: "Add Score", 

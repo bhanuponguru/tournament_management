@@ -25,7 +25,7 @@ function App() {
             <Route path="/manager_portal" element={<ManagerPortalHome />} />
             <Route path="/manager_portal/score" element={<ScorePortal />} />
             <Route path="/manager_portal/teams" element={<TeamsPortal />} />
-            <Route path="/manager_portal/tournmant" element={<TornmentPortal />} />
+            <Route path="/manager_portal/tournament" element={<TornmentPortal />} />
           </Route>
           <Route element={<RoleProtectedRoutes role1 = {"viewer"} />}>
             <Route path="/request_role" element={<Requestrole />} />
