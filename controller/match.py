@@ -35,6 +35,9 @@ class first_batting(BaseModel):
 class match_update(BaseModel):
     match_id: int
 
+class match_info(BaseModel):
+    match_id: int
+
 match= APIRouter()
 
 @match.get("/")
@@ -239,3 +242,32 @@ def update_inning(data: match_update, user: dict = Depends(get_current_user)):
     cursor.close()
     conn.close()
     return {"message": "Inning updated successfully"}
+
+@match.get('/batsman_statistics')
+def get_batsman_statistics(match_id: int):
+    conn=get_connection()
+    cursor = conn.cursor(dictionary=True)
+    cursor.execute("select * from matches where match_id = %s", (match_id,))
+    match = cursor.fetchone()
+    if not match:
+        raise HTTPException(status_code=404, detail="Match not found")
+    team_a_id = match["team_a_id"]
+    team_b_id = match["team_b_id"]
+    cursor.execute("select batsman_id, batsman_name,  sum(batsman_score) as batsman_score, count(batsman_id) as balls_played, max(wicket_type is not null) as is_wicket from log natural join (select player_id as batsman_id, name as batsman_name from player where team_id = %s) as batsman where match_id = %s group by batsman_id", (team_a_id, match_id))
+    team_a_batsman_stats = cursor.fetchall()
+    cursor.execute("select batsman_id, batsman_name,  sum(batsman_score) as batsman_score, count(batsman_id) as balls_played, max(wicket_type is not null) as is_wicket from log natural join (select player_id as batsman_id, name as batsman_name from player where team_id = %s) as batsman where match_id = %s group by batsman_id", (team_b_id, match_id))
+    team_b_batsman_stats = cursor.fetchall()
+    cursor.execute("select bowler_id, bowler_name, sum(bowler_score) as bowler_runs, count(bowler_id) as balls_bowled, sum(wicket_type is not null) as wickets from log natural join (select player_id as bowler_id, name as bowler_name from player where team_id = %s) as bowler where match_id = %s group by bowler_id", (team_a_id, match_id))
+    team_a_bowler_stats = cursor.fetchall()
+    cursor.execute("select bowler_id, bowler_name, sum(bowler_score) as bowler_runs, count(bowler_id) as balls_bowled, sum(wicket_type is not null) as wickets from log natural join (select player_id as bowler_id, name as bowler_name from player where team_id = %s) as bowler where match_id = %s group by bowler_id", (team_b_id, match_id))
+    team_b_bowler_stats = cursor.fetchall()
+    cursor.close()
+    conn.close()
+    result={
+        "team_a_batsman_stats": team_a_batsman_stats,
+        "team_b_batsman_stats": team_b_batsman_stats,
+        "team_a_bowler_stats": team_a_bowler_stats,
+        "team_b_bowler_stats": team_b_bowler_stats
+    }
+    return result
+
