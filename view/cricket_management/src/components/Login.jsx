@@ -1,5 +1,5 @@
 import React, { useState } from "react";
-import axios from "axios";
+import axios from "../api/axios";
 import { Navigate } from "react-router-dom";
 import { useCookies } from "react-cookie";
 
@@ -17,10 +17,8 @@ const Login = () => {
     }
 
     const handleLogin = () => {
-        const base_url = process.env.REACT_APP_baseUrl;
-        const url = base_url + "/users/login";
         axios
-            .post(url, {
+            .post("/users/login", {
                 email: email,
                 password: password,
             })
@@ -39,10 +37,8 @@ const Login = () => {
     };
 
     const handleSignup = () => {
-        const base_url = process.env.REACT_APP_baseUrl;
-        const url = base_url + "/users/register";
         axios
-            .post(url, {
+            .post("/users/register", {
                 email: email,
                 password: password,
                 name: name,
