@@ -244,7 +244,7 @@ def update_inning(data: match_update, user: dict = Depends(get_current_user)):
     return {"message": "Inning updated successfully"}
 
 @match.get('/player_statistics')
-def get_batsman_statistics(match_id: int):
+def get_players_statistics(match_id: int):
     conn=get_connection()
     cursor = conn.cursor(dictionary=True)
     cursor.execute("select * from matches where match_id = %s", (match_id,))
