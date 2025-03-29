@@ -46,7 +46,7 @@ CREATE TABLE `log` (
   CONSTRAINT `log_ibfk_4` FOREIGN KEY (`wicket_by_id`) REFERENCES `player` (`player_id`),
   CONSTRAINT `log_ibfk_5` FOREIGN KEY (`catch_by_id`) REFERENCES `player` (`player_id`),
   CONSTRAINT `log_match_FK` FOREIGN KEY (`match_id`) REFERENCES `matches` (`match_id`)
-) ENGINE=InnoDB AUTO_INCREMENT=6 DEFAULT CHARSET=utf8mb4 COLLATE=utf8mb4_0900_ai_ci;
+) ENGINE=InnoDB AUTO_INCREMENT=127 DEFAULT CHARSET=utf8mb4 COLLATE=utf8mb4_0900_ai_ci;
 /*!40101 SET character_set_client = @saved_cs_client */;
 
 --
@@ -94,7 +94,7 @@ CREATE TABLE `matches` (
   KEY `team_b` (`team_b_id`),
   CONSTRAINT `matches_ibfk_1` FOREIGN KEY (`team_a_id`) REFERENCES `team` (`team_id`) ON DELETE CASCADE,
   CONSTRAINT `matches_ibfk_2` FOREIGN KEY (`team_b_id`) REFERENCES `team` (`team_id`) ON DELETE CASCADE
-) ENGINE=InnoDB AUTO_INCREMENT=3 DEFAULT CHARSET=utf8mb4 COLLATE=utf8mb4_0900_ai_ci;
+) ENGINE=InnoDB AUTO_INCREMENT=7 DEFAULT CHARSET=utf8mb4 COLLATE=utf8mb4_0900_ai_ci;
 /*!40101 SET character_set_client = @saved_cs_client */;
 
 --
@@ -115,7 +115,7 @@ CREATE TABLE `player` (
   PRIMARY KEY (`player_id`),
   KEY `team_id` (`team_id`),
   CONSTRAINT `player_ibfk_1` FOREIGN KEY (`team_id`) REFERENCES `team` (`team_id`) ON DELETE SET NULL
-) ENGINE=InnoDB AUTO_INCREMENT=27 DEFAULT CHARSET=utf8mb4 COLLATE=utf8mb4_0900_ai_ci;
+) ENGINE=InnoDB AUTO_INCREMENT=125 DEFAULT CHARSET=utf8mb4 COLLATE=utf8mb4_0900_ai_ci;
 /*!40101 SET character_set_client = @saved_cs_client */;
 
 --
@@ -137,7 +137,7 @@ CREATE TABLE `role_requests` (
   KEY `role_requests_users_FK_1` (`user_id`),
   CONSTRAINT `role_requests_users_FK` FOREIGN KEY (`admin_id`) REFERENCES `users` (`user_id`),
   CONSTRAINT `role_requests_users_FK_1` FOREIGN KEY (`user_id`) REFERENCES `users` (`user_id`)
-) ENGINE=InnoDB AUTO_INCREMENT=5 DEFAULT CHARSET=utf8mb4 COLLATE=utf8mb4_0900_ai_ci;
+) ENGINE=InnoDB AUTO_INCREMENT=8 DEFAULT CHARSET=utf8mb4 COLLATE=utf8mb4_0900_ai_ci;
 /*!40101 SET character_set_client = @saved_cs_client */;
 
 --
@@ -155,12 +155,14 @@ CREATE TABLE `team` (
   `nrr` float DEFAULT '0',
   `tournament_id` int NOT NULL,
   `points` int NOT NULL DEFAULT '0',
+  `wins` int NOT NULL DEFAULT '0',
+  `losses` int NOT NULL DEFAULT '0',
   PRIMARY KEY (`team_id`),
   KEY `tournament_id` (`tournament_id`),
   KEY `captain` (`captain_id`),
   CONSTRAINT `team_ibfk_1` FOREIGN KEY (`tournament_id`) REFERENCES `tournament` (`tournament_id`),
   CONSTRAINT `team_ibfk_2` FOREIGN KEY (`captain_id`) REFERENCES `player` (`player_id`)
-) ENGINE=InnoDB AUTO_INCREMENT=8 DEFAULT CHARSET=utf8mb4 COLLATE=utf8mb4_0900_ai_ci;
+) ENGINE=InnoDB AUTO_INCREMENT=16 DEFAULT CHARSET=utf8mb4 COLLATE=utf8mb4_0900_ai_ci;
 /*!40101 SET character_set_client = @saved_cs_client */;
 
 --
@@ -183,7 +185,7 @@ CREATE TABLE `tournament` (
   KEY `organizer_id` (`organizer_id`),
   CONSTRAINT `tournament_ibfk_1` FOREIGN KEY (`manager_id`) REFERENCES `users` (`user_id`),
   CONSTRAINT `tournament_ibfk_2` FOREIGN KEY (`organizer_id`) REFERENCES `users` (`user_id`)
-) ENGINE=InnoDB AUTO_INCREMENT=6 DEFAULT CHARSET=utf8mb4 COLLATE=utf8mb4_0900_ai_ci;
+) ENGINE=InnoDB AUTO_INCREMENT=7 DEFAULT CHARSET=utf8mb4 COLLATE=utf8mb4_0900_ai_ci;
 /*!40101 SET character_set_client = @saved_cs_client */;
 
 --
@@ -201,7 +203,7 @@ CREATE TABLE `users` (
   `role` enum('viewer','admin','manager','organizer') CHARACTER SET utf8mb4 COLLATE utf8mb4_0900_ai_ci NOT NULL,
   PRIMARY KEY (`user_id`),
   UNIQUE KEY `email` (`email`)
-) ENGINE=InnoDB AUTO_INCREMENT=14 DEFAULT CHARSET=utf8mb4 COLLATE=utf8mb4_0900_ai_ci;
+) ENGINE=InnoDB AUTO_INCREMENT=20 DEFAULT CHARSET=utf8mb4 COLLATE=utf8mb4_0900_ai_ci;
 /*!40101 SET character_set_client = @saved_cs_client */;
 
 --
@@ -217,4 +219,4 @@ CREATE TABLE `users` (
 /*!40101 SET COLLATION_CONNECTION=@OLD_COLLATION_CONNECTION */;
 /*!40111 SET SQL_NOTES=@OLD_SQL_NOTES */;
 
--- Dump completed on 2025-03-28 15:45:27
+-- Dump completed on 2025-03-29 11:14:15
