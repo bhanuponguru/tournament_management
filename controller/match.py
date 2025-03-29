@@ -147,6 +147,30 @@ def get_matches_today(user: dict = Depends(get_current_user)):
     cursor = conn.cursor(dictionary=True)
     cursor.execute("SELECT * FROM matches natural join (select team_id as team_a_id, name as team_a_name from team) as team_a natural join (select team_id as team_b_id, name as team_b_name from team) as team_b WHERE date_time >= CURDATE() AND date_time < CURDATE() + INTERVAL 1 DAY")
     matches= cursor.fetchall()
+    for m in matches:
+        match_id = m["match_id"]
+        cursor.execute("SELECT * FROM matches WHERE match_id = %s", (match_id,))
+        match = cursor.fetchone()
+        if not match:
+            raise HTTPException(status_code=404, detail="Match not found")
+        cursor.execute("SELECT * FROM log natural join (select player_id as batsman_id, name as batsman_name from player) as batsman natural join (select player_id as bowler_id, name as bowler_name from player) as bowler left join (select player_id as wicket_by_id, name as wicket_by_name from player) as wicket_by on log.wicket_by_id = wicket_by.wicket_by_id left join (select player_id as catch_by_id, name as catch_by_name from player) as catch_by on log.catch_by_id = catch_by.catch_by_id WHERE match_id = %s order by date_time desc limit 1", (match_id,))
+        last_update = cursor.fetchone()
+        if not last_update:
+            raise HTTPException(status_code=404, detail="No updates found for this match")
+        batsman_id = last_update["batsman_id"]
+        bowler_id = last_update["bowler_id"]
+        cursor.execute("select batsman_id, batsman_name, sum(batsman_score) as batsman_score, count(batsman_id) as balls_played from log natural join (select player_id as batsman_id, name as batsman_name from player where player_id = %s) as batsman where match_id = %s", (batsman_id, match_id))
+        batsman_stats = cursor.fetchone()
+        cursor.execute("select bowler_id, bowler_name, sum(bowler_score) as bowler_runs, count(bowler_id) as balls_bowled, sum(wicket_type is not null and wicket_type != 'run_out') as wickets from log natural join (select player_id as bowler_id, name as bowler_name from player where player_id = %s) as bowler where match_id = %s", (bowler_id, match_id))
+        bowler_stats = cursor.fetchone()
+        cursor.execute("select batsman_id, bowler_id from log natural join (select player_id as batsman_id, name as batsman_name from player where player_id = %s) as batsman natural join (select player_id as bowler_id, name as bowler_name from player where player_id = %s) as bowler where match_id = %s order by date_time desc limit 1", (batsman_id, bowler_id, match_id))
+        last_wicket = cursor.fetchone()
+        result={}
+        result["last_update"] = last_update
+        result["last_batsman_stats"] = batsman_stats
+        result["last_bowler_stats"] = bowler_stats
+        result["last_wicket"] = last_wicket
+        m["last_update"] = result
     cursor.close()
     conn.close()
     return matches
@@ -273,31 +297,3 @@ def get_players_statistics(match_id: int, user: dict = Depends(get_current_user)
     }
     return result
 
-@match.get("/last_update")
-def get_last_update(match_id: int, user: dict = Depends(get_current_user)):
-    conn=get_connection()
-    cursor = conn.cursor(dictionary=True)
-    cursor.execute("SELECT * FROM matches WHERE match_id = %s", (match_id,))
-    match = cursor.fetchone()
-    if not match:
-        raise HTTPException(status_code=404, detail="Match not found")
-    cursor.execute("SELECT * FROM log natural join (select player_id as batsman_id, name as batsman_name from player) as batsman natural join (select player_id as bowler_id, name as bowler_name from player) as bowler left join (select player_id as wicket_by_id, name as wicket_by_name from player) as wicket_by on log.wicket_by_id = wicket_by.wicket_by_id left join (select player_id as catch_by_id, name as catch_by_name from player) as catch_by on log.catch_by_id = catch_by.catch_by_id WHERE match_id = %s order by date_time desc limit 1", (match_id,))
-    last_update = cursor.fetchone()
-    if not last_update:
-        raise HTTPException(status_code=404, detail="No updates found for this match")
-    batsman_id = last_update["batsman_id"]
-    bowler_id = last_update["bowler_id"]
-    cursor.execute("select batsman_id, batsman_name, sum(batsman_score) as batsman_score, count(batsman_id) as balls_played from log natural join (select player_id as batsman_id, name as batsman_name from player where player_id = %s) as batsman where match_id = %s", (batsman_id, match_id))
-    batsman_stats = cursor.fetchone()
-    cursor.execute("select bowler_id, bowler_name, sum(bowler_score) as bowler_runs, count(bowler_id) as balls_bowled, sum(wicket_type is not null and wicket_type != 'run_out') as wickets from log natural join (select player_id as bowler_id, name as bowler_name from player where player_id = %s) as bowler where match_id = %s", (bowler_id, match_id))
-    bowler_stats = cursor.fetchone()
-    cursor.execute("select batsman_id, bowler_id from log natural join (select player_id as batsman_id, name as batsman_name from player where player_id = %s) as batsman natural join (select player_id as bowler_id, name as bowler_name from player where player_id = %s) as bowler where match_id = %s order by date_time desc limit 1", (batsman_id, bowler_id, match_id))
-    last_wicket = cursor.fetchone()
-    result={}
-    result["last_update"] = last_update
-    result["last_batsman_stats"] = batsman_stats
-    result["last_bowler_stats"] = bowler_stats
-    result["last_wicket"] = last_wicket
-    cursor.close()
-    conn.close()
-    return result
