@@ -164,7 +164,7 @@ def get_matches_today(user: dict = Depends(get_current_user)):
         batsman_stats = cursor.fetchone()
         cursor.execute("select bowler_id, bowler_name, sum(bowler_score) as bowler_runs, count(bowler_id) as balls_bowled, sum(wicket_type is not null and wicket_type != 'run_out') as wickets from log natural join (select player_id as bowler_id, name as bowler_name from player where player_id = %s) as bowler where match_id = %s", (bowler_id, match_id))
         bowler_stats = cursor.fetchone()
-        cursor.execute("select batsman_id, bowler_id from log natural join (select player_id as batsman_id, name as batsman_name from player where player_id = %s) as batsman natural join (select player_id as bowler_id, name as bowler_name from player where player_id = %s) as bowler where match_id = %s order by date_time desc limit 1", (batsman_id, bowler_id, match_id))
+        cursor.execute("select batsman_id, bowler_id from log natural join (select player_id as batsman_id, name as batsman_name from player where player_id = %s) as batsman natural join (select player_id as bowler_id, name as bowler_name from player where player_id = %s) as bowler where match_id = %s and wicket_type is not null order by date_time desc limit 1", (batsman_id, bowler_id, match_id))
         last_wicket = cursor.fetchone()
         result={}
         result["last_update"] = last_update
