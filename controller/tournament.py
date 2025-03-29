@@ -55,7 +55,7 @@ def get_all_tournaments(user: dict = Depends(get_current_user)):
     return tournaments
 
 @tournament.get("/players")
-def get_players_in_tournament(tournament_id: int):
+def get_players_in_tournament(tournament_id: int, user: dict = Depends(get_current_user)):
     conn = get_connection()
     cursor = conn.cursor(dictionary=True)
     cursor.execute("SELECT * FROM tournament WHERE tournament_id = %s", (tournament_id,))
