@@ -30,7 +30,7 @@ const ScorePortal = () => {
 
   const LoadingSpinner = () => (
     <div className="flex justify-center items-center">
-      <div className="animate-spin rounded-full h-8 w-8 border-t-2 border-b-2 border-blue-500"></div>
+      <div className="animate-spin rounded-full h-8 w-8 border-t-2 border-b-2 border-white"></div>
     </div>
   );
   
@@ -161,368 +161,419 @@ const ScorePortal = () => {
   },[team1,team2])
   
   return (
-    <div className="min-h-screen bg-gray-900 text-white p-6">
-      {<Navbar />}
-      <h1 className="text-3xl font-bold text-center mb-6">Score Portal</h1>
+    <div
+      className="min-h-screen bg-[url(https://c0.wallpaperflare.com/path/967/82/462/australia-richmond-melbourne-cricket-ground-cricket-371772744fa62261f54850a915da5c9b.jpg)] bg-gray-900 text-white p-6 bg-cover bg-center"
+    >
+      <div className="absolute inset-0 bg-black/50"></div>
+      
+      <div className="relative z-30">
+        {<Navbar />}
+      </div>
+      
+      <div className="relative z-10 max-w-4xl mx-auto bg-white/10 rounded-3xl overflow-hidden shadow-2xl mt-8">
+        <div className="w-full p-8 relative z-20">
+          <h1 className="text-4xl font-bold text-center mb-8 text-white">Score Portal</h1>
 
-      <div className="max-w-md mx-auto space-y-4">
-        {loadingTournaments ? (
-          <LoadingSpinner />
-        ) : tournament.length !== 0 ? (
-          <div>
-            <label htmlFor="Tournament" className="block mb-1">Select a Tournament</label>
-            <select 
-              onChange={(e)=>{setSelectedTournament(e.target.value)}} 
-              name="Tournament" 
-              id="Tournament"
-              className="w-full p-2 bg-gray-700 rounded"
-            >
-              <option value="">Select an option</option>
-              {tournament.map((item,key)=>{
-                return <option key={key} value={item.tournament_id}>{item.tournament_name}</option>
-              })}
-            </select>
-          </div>
-        ) : <p className="text-red-400">No Tournament available</p>}
+          <div className="space-y-6">
+            {loadingTournaments ? (
+              <LoadingSpinner />
+            ) : tournament.length !== 0 ? (
+              <div>
+                <label htmlFor="Tournament" className="block mb-2 text-sm font-semibold">
+                  Select a Tournament
+                </label>
+                <select 
+                  onChange={(e)=>{setSelectedTournament(e.target.value)}} 
+                  name="Tournament" 
+                  id="Tournament"
+                  className="w-full p-3 bg-white/20 rounded-lg border border-white/30 focus:ring-2 focus:ring-white/50 transition-all duration-300 text-white"
+                >
+                  <option value="" className="bg-gray-900 text-white">Select an option</option>
+                  {tournament.map((item,key)=>{
+                    return <option key={key} value={item.tournament_id} className="bg-gray-900 text-white">{item.tournament_name}</option>
+                  })}
+                </select>
+              </div>
+            ) : <p className="text-red-400 bg-red-500/20 p-4 rounded-lg border border-red-500/50">No Tournament available</p>}
 
-        {selectedTournament !== "" && (loadingMatches ? (
-          <LoadingSpinner />
-        ) : matches.length !== 0 ? 
-          <div>
-            <label htmlFor="Match" className="block mb-1">Select a Match</label>
-            <select 
-              onChange={(e)=>{setSelectedMatch(e.target.value)}} 
-              name="Match" 
-              id="Match"
-              className="w-full p-2 bg-gray-700 rounded"
-            >
-              <option value="">Select an option</option>
-              {matches.map((item,key)=>{
-                if(item.outcome !== null)
-                  return null
-                return <option key={key} value={item.match_id}>{item.team_a_name} vs {item.team_b_name}</option>
-              })}
-            </select>
-          </div>
-        :<p className="text-red-400">No Matches available</p>)}
-        {selectedTournament && selectedMatch !== "" && <p className="text-center text-xl text-gray-300">{selectedMatchObj.team_a_name} vs {selectedMatchObj.team_b_name}</p>}
-        {selectedTournament && selectedMatch !== "" && <p className="text-center text-xl text-gray-300">{selectedMatchObj.inning === 1 ? "First Inning" : "Second Inning"}</p>}
-        {selectedTournament && selectedMatch !== "" && <div>
-          <label htmlFor="tossWinner" className="block mb-1">Select Toss Winner</label>
-          <select 
-            onChange={(e)=>{
-              axios.put('/matches/toss_winner',{team:e.target.value,match_id:selectedMatch},{headers:{"Authorization":`Bearer ${cookies.token}`}})
-              .catch((error)=>{
-                console.log(error);
-              })
-              setSelectedMatchObj({...selectedMatchObj,toss_winner:e.target.value})
-              }} 
-            value={selectedMatchObj.toss_winner === null ? "" : selectedMatchObj.toss_winner} 
-            name="tossWinner" 
-            id="tossWinner"
-            className="w-full p-2 bg-gray-700 rounded"
-          >
-            <option disabled={selectedMatchObj.toss_winner !== null} value={""}>Select a Team</option>
-            <option disabled={selectedMatchObj.toss_winner === "team_b"} value={"team_a"}>{selectedMatchObj.team_a_name}</option>
-            <option disabled={selectedMatchObj.toss_winner === "team_a"} value={"team_b"}>{selectedMatchObj.team_b_name}</option>
-          </select>
-        </div>}
-
-        {selectedTournament && selectedMatch!==''&& selectedMatchObj.toss_winner !== null && 
-        <div>
-          <label htmlFor="batting team" className="block mb-1">Choose Batting Team</label>
-          <select 
-            onChange={(e)=>{
-            axios.put('/matches/first_batting',{team:e.target.value,match_id:selectedMatch},{headers:{"Authorization":`Bearer ${cookies.token}`}})
-            .catch((error)=>{
-              console.log(error);
-            })
-            setSelectedMatchObj({...selectedMatchObj,first_batting:e.target.value})
-            }} 
-            value={selectedMatchObj.first_batting === null ? "" : selectedMatchObj.first_batting} 
-            name="tossWinner" 
-            id="tossWinner"
-            className="w-full p-2 bg-gray-700 rounded"
-          >
-            <option disabled={selectedMatchObj.first_batting !== null} value={""}>Select a Team</option>
-            <option disabled={selectedMatchObj.first_batting === "team_b"} value={"team_a"}>{selectedMatchObj.team_a_name}</option>
-            <option disabled={selectedMatchObj.first_batting === "team_a"} value={"team_b"}>{selectedMatchObj.team_b_name}</option>
-          </select>
-        </div>}
-
-        {selectedTournament && selectedMatch !== "" && selectedMatchObj.first_batting !== null && (loadingTeams ? (
-          <LoadingSpinner />
-        ) : (
-          <div className="flex space-x-4">
-            <div className="w-1/2">
-              <label htmlFor="batsman" className="block mb-1">Select Batsman</label>
+            {selectedTournament !== "" && (loadingMatches ? (
+              <LoadingSpinner />
+            ) : matches.length !== 0 ? 
+              <div>
+                <label htmlFor="Match" className="block mb-2 text-sm font-semibold">
+                  Select a Match
+                </label>
+                <select 
+                  onChange={(e)=>{setSelectedMatch(e.target.value)}} 
+                  name="Match" 
+                  id="Match"
+                  className="w-full p-3 bg-white/20 rounded-lg border border-white/30 focus:ring-2 focus:ring-white/50 transition-all duration-300 text-white"
+                >
+                  <option value="" className="bg-gray-900 text-white">Select an option</option>
+                  {matches.map((item,key)=>{
+                    if(item.outcome !== null)
+                      return null
+                    return <option key={key} value={item.match_id} className="bg-gray-900 text-white">{item.team_a_name} vs {item.team_b_name}</option>
+                  })}
+                </select>
+              </div>
+            :<p className="text-red-400 bg-red-500/20 p-4 rounded-lg border border-red-500/50">No Matches available</p>)}
+            
+            {selectedTournament && selectedMatch !== "" && (
+              <div className="bg-white/10 p-4 rounded-lg border border-white/30 text-center">
+                <p className="text-xl text-white">{selectedMatchObj.team_a_name} vs {selectedMatchObj.team_b_name}</p>
+                <p className="text-lg text-white/80 mt-1">{selectedMatchObj.inning === 1 ? "First Inning" : "Second Inning"}</p>
+              </div>
+            )}
+            
+            {selectedTournament && selectedMatch !== "" && <div>
+              <label htmlFor="tossWinner" className="block mb-2 text-sm font-semibold">
+                Select Toss Winner
+              </label>
               <select 
-                onChange={(e)=>{setBatsman(e.target.value)}} 
-                name="batsman" 
-                id="batsman"
-                className="w-full p-2 bg-gray-700 rounded"
+                onChange={(e)=>{
+                  axios.put('/matches/toss_winner',{team:e.target.value,match_id:selectedMatch},{headers:{"Authorization":`Bearer ${cookies.token}`}})
+                  .catch((error)=>{
+                    console.log(error);
+                  })
+                  setSelectedMatchObj({...selectedMatchObj,toss_winner:e.target.value})
+                  }} 
+                value={selectedMatchObj.toss_winner === null ? "" : selectedMatchObj.toss_winner} 
+                name="tossWinner" 
+                id="tossWinner"
+                className="w-full p-3 bg-white/20 rounded-lg border border-white/30 focus:ring-2 focus:ring-white/50 transition-all duration-300 text-white"
               >
-                <option value="">Select an option</option>
-                {battingTeam.map((item,key)=>{
-                  return <option key={key} value={item.player_id}>{item.name}</option>
-                })}
+                <option disabled={selectedMatchObj.toss_winner !== null} value={""} className="bg-gray-900 text-white">Select a Team</option>
+                <option disabled={selectedMatchObj.toss_winner === "team_b"} value={"team_a"} className="bg-gray-900 text-white">{selectedMatchObj.team_a_name}</option>
+                <option disabled={selectedMatchObj.toss_winner === "team_a"} value={"team_b"} className="bg-gray-900 text-white">{selectedMatchObj.team_b_name}</option>
               </select>
-            </div>
-            <div className="w-1/2">
-              <label htmlFor="Bowler" className="block mb-1">Select Bowler</label>
+            </div>}
+
+            {selectedTournament && selectedMatch!==''&& selectedMatchObj.toss_winner !== null && 
+            <div>
+              <label htmlFor="batting team" className="block mb-2 text-sm font-semibold">
+                Choose Batting Team
+              </label>
               <select 
-                onChange={(e)=>{setBowler(e.target.value)}} 
-                name="Bowler" 
-                id="Bowler"
-                className="w-full p-2 bg-gray-700 rounded"
+                onChange={(e)=>{
+                axios.put('/matches/first_batting',{team:e.target.value,match_id:selectedMatch},{headers:{"Authorization":`Bearer ${cookies.token}`}})
+                .catch((error)=>{
+                  console.log(error);
+                })
+                setSelectedMatchObj({...selectedMatchObj,first_batting:e.target.value})
+                }} 
+                value={selectedMatchObj.first_batting === null ? "" : selectedMatchObj.first_batting} 
+                name="tossWinner" 
+                id="tossWinner"
+                className="w-full p-3 bg-white/20 rounded-lg border border-white/30 focus:ring-2 focus:ring-white/50 transition-all duration-300 text-white"
               >
-                <option value="">Select an option</option>
-                {bowlingTeam.map((item,key)=>{
-                  return <option key={key} value={item.player_id}>{item.name}</option>
-                })}
+                <option disabled={selectedMatchObj.first_batting !== null} value={""} className="bg-gray-900 text-white">Select a Team</option>
+                <option disabled={selectedMatchObj.first_batting === "team_b"} value={"team_a"} className="bg-gray-900 text-white">{selectedMatchObj.team_a_name}</option>
+                <option disabled={selectedMatchObj.first_batting === "team_a"} value={"team_b"} className="bg-gray-900 text-white">{selectedMatchObj.team_b_name}</option>
               </select>
-            </div>
-          </div>
-        ))}
+            </div>}
 
-        {batsman !== "" && bowler !== "" && 
-          <div>
-            <label htmlFor="ballType" className="block mb-1">Ball Type</label>
-            <select 
-              onChange={(e)=>{setBallType(e.target.value)}} 
-              name="ballType" 
-              id="ballType"
-              className="w-full p-2 bg-gray-700 rounded"
-            >
-              <option value="">Select an option</option>
-              <option value="wide">Wide</option>
-              <option value="noball">No Ball</option>
-              <option value="legal">Legal</option>
-            </select>
-          </div>
-        }
+            {selectedTournament && selectedMatch !== "" && selectedMatchObj.first_batting !== null && (loadingTeams ? (
+              <LoadingSpinner />
+            ) : (
+              <div className="flex space-x-4">
+                <div className="w-1/2">
+                  <label htmlFor="batsman" className="block mb-2 text-sm font-semibold">
+                    Select Batsman
+                  </label>
+                  <select 
+                    onChange={(e)=>{setBatsman(e.target.value)}} 
+                    name="batsman" 
+                    id="batsman"
+                    className="w-full p-3 bg-white/20 rounded-lg border border-white/30 focus:ring-2 focus:ring-white/50 transition-all duration-300 text-white"
+                  >
+                    <option value="" className="bg-gray-900 text-white">Select an option</option>
+                    {battingTeam.map((item,key)=>{
+                      return <option key={key} value={item.player_id} className="bg-gray-900 text-white">{item.name}</option>
+                    })}
+                  </select>
+                </div>
+                <div className="w-1/2">
+                  <label htmlFor="Bowler" className="block mb-2 text-sm font-semibold">
+                    Select Bowler
+                  </label>
+                  <select 
+                    onChange={(e)=>{setBowler(e.target.value)}} 
+                    name="Bowler" 
+                    id="Bowler"
+                    className="w-full p-3 bg-white/20 rounded-lg border border-white/30 focus:ring-2 focus:ring-white/50 transition-all duration-300 text-white"
+                  >
+                    <option value="" className="bg-gray-900 text-white">Select an option</option>
+                    {bowlingTeam.map((item,key)=>{
+                      return <option key={key} value={item.player_id} className="bg-gray-900 text-white">{item.name}</option>
+                    })}
+                  </select>
+                </div>
+              </div>
+            ))}
 
-        { selectedTournament && selectedMatch && ballType == "legal" &&
-          <div>
-            <label htmlFor="batsmanScore" className="block mb-1">Select Batsman Score</label>
-            <select 
-              onChange={(e)=>{setBatsmanScore(e.target.value)}} 
-              name="batsmanScore" 
-              id="batsmanScore"
-              className="w-full p-2 bg-gray-700 rounded"
-            >
-              <option value="">Select an option</option>
-              <option value="0">0</option>
-              <option value="1">1</option>
-              <option value="2">2</option>
-              <option value="3">3</option>
-              <option value="4">4</option>
-              <option value="6">6</option>
-              <option value="wicket">Wicket</option>
-            </select>
-            { batsmanScore !== 'wicket' && batsmanScore != "" &&
-              <div className="mt-4">
-                <label htmlFor="bowlerScore" className="block mb-1">Select Bowler Score</label>
+            {batsman !== "" && bowler !== "" && 
+              <div>
+                <label htmlFor="ballType" className="block mb-2 text-sm font-semibold">
+                  Ball Type
+                </label>
                 <select 
-                  onChange={(e)=>{setBowlerScore(e.target.value)}} 
-                  name="bowlerScore" 
-                  id="bowlerScore"
-                  className="w-full p-2 bg-gray-700 rounded"
+                  onChange={(e)=>{setBallType(e.target.value)}} 
+                  name="ballType" 
+                  id="ballType"
+                  className="w-full p-3 bg-white/20 rounded-lg border border-white/30 focus:ring-2 focus:ring-white/50 transition-all duration-300 text-white"
                 >
-                  <option value="">Select an option</option>
-                  <option value="0">0</option>
-                  <option value="1">1</option>
-                  <option value="2">2</option>
-                  <option value="3">3</option>
-                  <option value="4">4</option>
-                  <option value="6">6</option>
+                  <option value="" className="bg-gray-900 text-white">Select an option</option>
+                  <option value="wide" className="bg-gray-900 text-white">Wide</option>
+                  <option value="noball" className="bg-gray-900 text-white">No Ball</option>
+                  <option value="legal" className="bg-gray-900 text-white">Legal</option>
                 </select>
               </div>
             }
-            {batsmanScore === "wicket" &&
-              <div className="mt-4">
-                <label htmlFor="wicketType" className="block mb-1">Select Wicket Type</label>
-                <select 
-                  onChange={(e)=>{setWicketType(e.target.value)}} 
-                  name="wicketType" 
-                  id="wicketType"
-                  className="w-full p-2 bg-gray-700 rounded"
-                >
-                  <option value="">Select an option</option>
-                  <option value="bowled">Bowled</option>
-                  <option value="caught">Caught</option>
-                  <option value="runout">Runout</option>
-                  <option value="stumped">Stumped</option>
-                </select>
-              </div>
-            }
-            {batsmanScore === "wicket" &&  wicketType === "caught" &&
-              <div className="mt-4">
-                <label htmlFor="catchBy" className="block mb-1">Caught By</label>
-                <select 
-                  onChange={(e)=>{setCatchBy(e.target.value)}} 
-                  name="catchBy" 
-                  id="catchBy"
-                  className="w-full p-2 bg-gray-700 rounded"
-                >
-                  <option value="">Select an option</option>
-                  {bowlingTeam.map((item,key)=>{
-                    return <option key={key} value={item.player_id}>{item.name}</option>
-                  })}
-                </select>
-              </div>
-            }
-            {batsmanScore === "wicket" && wicketType === "runout" &&
-              <div className="mt-4">
-                <label htmlFor="wicketBy" className="block mb-1">Wicket By</label>
-                <select 
-                  onChange={(e)=>{setWicketBy(e.target.value)}} 
-                  name="wicketBy" 
-                  id="wicketBy"
-                  className="w-full p-2 bg-gray-700 rounded"
-                >
-                  <option value="">Select an option</option>
-                  {bowlingTeam.map((item,key)=>{
-                    return <option key={key} value={item.player_id}>{item.name}</option>
-                  })}
-                </select>
-              </div>
-            }
-          </div>
-        }
 
-        {selectedTournament && selectedMatch && ballType === "wide" &&
-          <div>
-            <label htmlFor="batsmanScore" className="block mb-1">Select Batsman Score</label>
-            <select 
-              onChange={(e)=>{setBatsmanScore(e.target.value)}} 
-              name="batsmanScore" 
-              id="batsmanScore"
-              className="w-full p-2 bg-gray-700 rounded"
-            >
-              <option value="">Select an option</option>
-              <option value="0">0</option>
-              <option value="1">1</option>
-              <option value="2">2</option>
-              <option value="3">3</option>
-              <option value="4">4</option>
-              <option value="6">6</option>
-              <option value="wicket">Wicket</option>
-            </select>
-            { batsmanScore !== 'wicket' && batsmanScore !== "" &&
-              <div className="mt-4">
-                <label htmlFor="bowlerScore" className="block mb-1">Select Bowler Score</label>
+            { selectedTournament && selectedMatch && ballType == "legal" &&
+              <div>
+                <label htmlFor="batsmanScore" className="block mb-2 text-sm font-semibold">
+                  Select Batsman Score
+                </label>
                 <select 
-                  onChange={(e)=>{setBowlerScore(e.target.value)}} 
-                  name="bowlerScore" 
-                  id="bowlerScore"
-                  className="w-full p-2 bg-gray-700 rounded"
+                  onChange={(e)=>{setBatsmanScore(e.target.value)}} 
+                  name="batsmanScore" 
+                  id="batsmanScore"
+                  className="w-full p-3 bg-white/20 rounded-lg border border-white/30 focus:ring-2 focus:ring-white/50 transition-all duration-300 text-white"
                 >
-                  <option value="">Select an option</option>
-                  <option value="0">0</option>
-                  <option value="1">1</option>
-                  <option value="2">2</option>
-                  <option value="3">3</option>
-                  <option value="4">4</option>
-                  <option value="6">6</option>
+                  <option value="" className="bg-gray-900 text-white">Select an option</option>
+                  <option value="0" className="bg-gray-900 text-white">0</option>
+                  <option value="1" className="bg-gray-900 text-white">1</option>
+                  <option value="2" className="bg-gray-900 text-white">2</option>
+                  <option value="3" className="bg-gray-900 text-white">3</option>
+                  <option value="4" className="bg-gray-900 text-white">4</option>
+                  <option value="6" className="bg-gray-900 text-white">6</option>
+                  <option value="wicket" className="bg-gray-900 text-white">Wicket</option>
                 </select>
-              </div>
-            }
-            {batsmanScore === "wicket" &&
-              <div className="mt-4">
-                <label htmlFor="wicketType" className="block mb-1">Select Wicket Type</label>
-                <select 
-                  onChange={(e)=>{setWicketType(e.target.value)}} 
-                  name="wicketType" 
-                  id="wicketType"
-                  className="w-full p-2 bg-gray-700 rounded"
-                >
-                  <option value="">Select an option</option>
-                  <option value="runout">Runout</option>
-                  <option value="stumped">Stumped</option>
-                </select>
-              </div>
-            }
-            {batsmanScore === "wicket" && wicketType === "runout" &&
-              <div className="mt-4">
-                <label htmlFor="wicketBy" className="block mb-1">Wicket By</label>
-                <select 
-                  onChange={(e)=>{setWicketBy(e.target.value)}} 
-                  name="wicketBy" 
-                  id="wicketBy"
-                  className="w-full p-2 bg-gray-700 rounded"
-                >
-                  <option value="">Select an option</option>
-                  {bowlingTeam.map((item,key)=>{
-                    return <option key={key} value={item.player_id}>{item.name}</option>
-                  })}
-                </select>
-              </div>
-            }
-          </div>
-        }
-
-        {selectedTournament && selectedMatch && ballType === "noball" &&
-          <div>
-            <label htmlFor="batsmanScore" className="block mb-1">Select Batsman Score</label>
-            <select 
-              onChange={(e)=>{
-                setBatsmanScore(e.target.value);
-                if(e.target.value === 'wicket'){
-                  setWicketType("runout")
+                { batsmanScore !== 'wicket' && batsmanScore != "" &&
+                  <div className="mt-4">
+                    <label htmlFor="bowlerScore" className="block mb-2 text-sm font-semibold">
+                      Select Bowler Score
+                    </label>
+                    <select 
+                      onChange={(e)=>{setBowlerScore(e.target.value)}} 
+                      name="bowlerScore" 
+                      id="bowlerScore"
+                      className="w-full p-3 bg-white/20 rounded-lg border border-white/30 focus:ring-2 focus:ring-white/50 transition-all duration-300 text-white"
+                    >
+                      <option value="" className="bg-gray-900 text-white">Select an option</option>
+                      <option value="0" className="bg-gray-900 text-white">0</option>
+                      <option value="1" className="bg-gray-900 text-white">1</option>
+                      <option value="2" className="bg-gray-900 text-white">2</option>
+                      <option value="3" className="bg-gray-900 text-white">3</option>
+                      <option value="4" className="bg-gray-900 text-white">4</option>
+                      <option value="6" className="bg-gray-900 text-white">6</option>
+                    </select>
+                  </div>
                 }
-              }} 
-              name="batsmanScore" 
-              id="batsmanScore"
-              className="w-full p-2 bg-gray-700 rounded"
-            >
-              <option value="">Select an option</option>
-              <option value="0">0</option>
-              <option value="1">1</option>
-              <option value="2">2</option>
-              <option value="3">3</option>
-              <option value="4">4</option>
-              <option value="6">6</option>
-              <option value="wicket">Wicket</option>
-            </select>
-            { batsmanScore !== 'wicket' && batsmanScore !== "" &&
-              <div className="mt-4">
-                <label htmlFor="bowlerScore" className="block mb-1">Select Bowler Score</label>
+                {batsmanScore === "wicket" &&
+                  <div className="mt-4">
+                    <label htmlFor="wicketType" className="block mb-2 text-sm font-semibold">
+                      Select Wicket Type
+                    </label>
+                    <select 
+                      onChange={(e)=>{setWicketType(e.target.value)}} 
+                      name="wicketType" 
+                      id="wicketType"
+                      className="w-full p-3 bg-white/20 rounded-lg border border-white/30 focus:ring-2 focus:ring-white/50 transition-all duration-300 text-white"
+                    >
+                      <option value="" className="bg-gray-900 text-white">Select an option</option>
+                      <option value="bowled" className="bg-gray-900 text-white">Bowled</option>
+                      <option value="caught" className="bg-gray-900 text-white">Caught</option>
+                      <option value="runout" className="bg-gray-900 text-white">Runout</option>
+                      <option value="stumped" className="bg-gray-900 text-white">Stumped</option>
+                    </select>
+                  </div>
+                }
+                {batsmanScore === "wicket" &&  wicketType === "caught" &&
+                  <div className="mt-4">
+                    <label htmlFor="catchBy" className="block mb-2 text-sm font-semibold">
+                      Caught By
+                    </label>
+                    <select 
+                      onChange={(e)=>{setCatchBy(e.target.value)}} 
+                      name="catchBy" 
+                      id="catchBy"
+                      className="w-full p-3 bg-white/20 rounded-lg border border-white/30 focus:ring-2 focus:ring-white/50 transition-all duration-300 text-white"
+                    >
+                      <option value="" className="bg-gray-900 text-white">Select an option</option>
+                      {bowlingTeam.map((item,key)=>{
+                        return <option key={key} value={item.player_id} className="bg-gray-900 text-white">{item.name}</option>
+                      })}
+                    </select>
+                  </div>
+                }
+                {batsmanScore === "wicket" && wicketType === "runout" &&
+                  <div className="mt-4">
+                    <label htmlFor="wicketBy" className="block mb-2 text-sm font-semibold">
+                      Wicket By
+                    </label>
+                    <select 
+                      onChange={(e)=>{setWicketBy(e.target.value)}} 
+                      name="wicketBy" 
+                      id="wicketBy"
+                      className="w-full p-3 bg-white/20 rounded-lg border border-white/30 focus:ring-2 focus:ring-white/50 transition-all duration-300 text-white"
+                    >
+                      <option value="" className="bg-gray-900 text-white">Select an option</option>
+                      {bowlingTeam.map((item,key)=>{
+                        return <option key={key} value={item.player_id} className="bg-gray-900 text-white">{item.name}</option>
+                      })}
+                    </select>
+                  </div>
+                }
+              </div>
+            }
+
+            {selectedTournament && selectedMatch && ballType === "wide" &&
+              <div>
+                <label htmlFor="batsmanScore" className="block mb-2 text-sm font-semibold">
+                  Select Batsman Score
+                </label>
                 <select 
-                  onChange={(e)=>{setBowlerScore(e.target.value)}} 
-                  name="bowlerScore" 
-                  id="bowlerScore"
-                  className="w-full p-2 bg-gray-700 rounded"
+                  onChange={(e)=>{setBatsmanScore(e.target.value)}} 
+                  name="batsmanScore" 
+                  id="batsmanScore"
+                  className="w-full p-3 bg-white/20 rounded-lg border border-white/30 focus:ring-2 focus:ring-white/50 transition-all duration-300 text-white"
                 >
-                  <option value="">Select an option</option>
-                  <option value="0">0</option>
-                  <option value="1">1</option>
-                  <option value="2">2</option>
-                  <option value="3">3</option>
-                  <option value="4">4</option>
-                  <option value="5">5</option>
-                  <option value="6">6</option>
-                  <option value="7">7</option>
+                  <option value="" className="bg-gray-900 text-white">Select an option</option>
+                  <option value="0" className="bg-gray-900 text-white">0</option>
+                  <option value="1" className="bg-gray-900 text-white">1</option>
+                  <option value="2" className="bg-gray-900 text-white">2</option>
+                  <option value="3" className="bg-gray-900 text-white">3</option>
+                  <option value="4" className="bg-gray-900 text-white">4</option>
+                  <option value="6" className="bg-gray-900 text-white">6</option>
+                  <option value="wicket" className="bg-gray-900 text-white">Wicket</option>
+                </select>
+                { batsmanScore !== 'wicket' && batsmanScore !== "" &&
+                  <div className="mt-4">
+                    <label htmlFor="bowlerScore" className="block mb-2 text-sm font-semibold">
+                      Select Bowler Score
+                    </label>
+                    <select 
+                      onChange={(e)=>{setBowlerScore(e.target.value)}} 
+                      name="bowlerScore" 
+                      id="bowlerScore"
+                      className="w-full p-3 bg-white/20 rounded-lg border border-white/30 focus:ring-2 focus:ring-white/50 transition-all duration-300 text-white"
+                    >
+                      <option value="" className="bg-gray-900 text-white">Select an option</option>
+                      <option value="0" className="bg-gray-900 text-white">0</option>
+                      <option value="1" className="bg-gray-900 text-white">1</option>
+                      <option value="2" className="bg-gray-900 text-white">2</option>
+                      <option value="3" className="bg-gray-900 text-white">3</option>
+                      <option value="4" className="bg-gray-900 text-white">4</option>
+                      <option value="6" className="bg-gray-900 text-white">6</option>
+                    </select>
+                  </div>
+                }
+                {batsmanScore === "wicket" &&
+                  <div className="mt-4">
+                    <label htmlFor="wicketType" className="block mb-2 text-sm font-semibold">
+                      Select Wicket Type
+                    </label>
+                    <select 
+                      onChange={(e)=>{setWicketType(e.target.value)}} 
+                      name="wicketType" 
+                      id="wicketType"
+                      className="w-full p-3 bg-white/20 rounded-lg border border-white/30 focus:ring-2 focus:ring-white/50 transition-all duration-300 text-white"
+                    >
+                      <option value="" className="bg-gray-900 text-white">Select an option</option>
+                      <option value="runout" className="bg-gray-900 text-white">Runout</option>
+                      <option value="stumped" className="bg-gray-900 text-white">Stumped</option>
+                    </select>
+                  </div>
+                }
+                {batsmanScore === "wicket" && wicketType === "runout" &&
+                  <div className="mt-4">
+                    <label htmlFor="wicketBy" className="block mb-2 text-sm font-semibold">
+                      Wicket By
+                    </label>
+                    <select 
+                      onChange={(e)=>{setWicketBy(e.target.value)}} 
+                      name="wicketBy" 
+                      id="wicketBy"
+                      className="w-full p-3 bg-white/20 rounded-lg border border-white/30 focus:ring-2 focus:ring-white/50 transition-all duration-300 text-white"
+                    >
+                      <option value="" className="bg-gray-900 text-white">Select an option</option>
+                      {bowlingTeam.map((item,key)=>{
+                        return <option key={key} value={item.player_id} className="bg-gray-900 text-white">{item.name}</option>
+                      })}
+                    </select>
+                  </div>
+                }
+              </div>
+            }
+
+            {selectedTournament && selectedMatch && ballType === "noball" &&
+              <div>
+                <label htmlFor="batsmanScore" className="block mb-2 text-sm font-semibold">
+                  Select Batsman Score
+                </label>
+                <select 
+                  onChange={(e)=>{
+                    setBatsmanScore(e.target.value);
+                    if(e.target.value === 'wicket'){
+                      setWicketType("runout")
+                    }
+                  }} 
+                  name="batsmanScore" 
+                  id="batsmanScore"
+                  className="w-full p-3 bg-white/20 rounded-lg border border-white/30 focus:ring-2 focus:ring-white/50 transition-all duration-300 text-white"
+                >
+                  <option value="" className="bg-gray-900 text-white">Select an option</option>
+                  <option value="0" className="bg-gray-900 text-white">0</option>
+                  <option value="1" className="bg-gray-900 text-white">1</option>
+                  <option value="2" className="bg-gray-900 text-white">2</option>
+                  <option value="3" className="bg-gray-900 text-white">3</option>
+                  <option value="4" className="bg-gray-900 text-white">4</option>
+                  <option value="6" className="bg-gray-900 text-white">6</option>
+                  <option value="wicket" className="bg-gray-900 text-white">Wicket</option>
+                </select>
+                { batsmanScore !== 'wicket' && batsmanScore !== "" &&
+                  <div className="mt-4">
+                    <label htmlFor="bowlerScore" className="block mb-2 text-sm font-semibold">
+                      Select Bowler Score
+                    </label>
+                    <select 
+                      onChange={(e)=>{setBowlerScore(e.target.value)}} 
+                      name="bowlerScore" 
+                      id="bowlerScore"
+                      className="w-full p-3 bg-white/20 rounded-lg border border-white/30 focus:ring-2 focus:ring-white/50 transition-all duration-300 text-white"
+                    >
+                      <option value="" className="bg-gray-900 text-white">Select an option</option>
+                      <option value="0" className="bg-gray-900 text-white">0</option>
+                  <option value="1" className="bg-gray-900 text-white">1</option>
+                  <option value="2" className="bg-gray-900 text-white">2</option>
+                  <option value="3" className="bg-gray-900 text-white">3</option>
+                  <option value="4" className="bg-gray-900 text-white">4</option>
+                  <option value="6" className="bg-gray-900 text-white">6</option>
                 </select>
               </div>
             }
             {batsmanScore === "wicket" &&
               <div className="mt-4">
-                <p className="text-red-400">Wicket is only runout</p>
+                <p className="text-red-400 bg-red-500/20 p-2 rounded-lg border border-red-500/50">Wicket is only runout</p>
               </div>
             }
             {batsmanScore === "wicket" && wicketType === "runout" &&
               <div className="mt-4">
-                <label htmlFor="wicketBy" className="block mb-1">Wicket By</label>
+                <label htmlFor="wicketBy" className="block mb-2 text-sm font-semibold">
+                  Wicket By
+                </label>
                 <select 
                   onChange={(e)=>{setWicketBy(e.target.value)}} 
                   name="wicketBy" 
                   id="wicketBy"
-                  className="w-full p-2 bg-gray-700 rounded"
+                  className="w-full p-3 bg-white/20 rounded-lg border border-white/30 focus:ring-2 focus:ring-white/50 transition-all duration-300 text-white"
                 >
-                  <option value="">Select an option</option>
+                  <option value="" className="bg-gray-900 text-white">Select an option</option>
                   {bowlingTeam.map((item,key)=>{
-                    return <option key={key} value={item.player_id}>{item.name}</option>
+                    return <option key={key} value={item.player_id} className="bg-gray-900 text-white">{item.name}</option>
                   })}
                 </select>
               </div>
@@ -534,21 +585,26 @@ const ScorePortal = () => {
           <button 
             onClick={handleSubmitScore} 
             disabled={submitLoading}
-            className="w-full bg-blue-600 p-2 rounded-lg hover:bg-blue-700 disabled:bg-gray-500 mt-4"
+            className="w-full mt-8 py-3 px-6 bg-blue-600 hover:bg-blue-700 text-white rounded-lg transition-all duration-300 shadow-lg hover:shadow-xl disabled:bg-gray-500 disabled:cursor-not-allowed flex justify-center items-center"
           >
             {submitLoading ? <LoadingSpinner /> : 'Submit Score'}
           </button>
         }
-        {selectedTournament && selectedMatch && <button 
-          className="w-full bg-blue-600 p-2 rounded-lg hover:bg-blue-700 disabled:bg-gray-500 mt-4 text-white flex justify-center items-center" 
-          onClick={handleFinish}
-          disabled={loadingMatchFinish}
-        >
-          {loadingMatchFinish ? <LoadingSpinner /> : (selectedMatchObj.inning === 1 ? "Finish inning" : "Finish match")}
-        </button>}
+        
+        {selectedTournament && selectedMatch && 
+          <button 
+            className="w-full mt-4 py-3 px-6 bg-emerald-600 hover:bg-emerald-700 text-white rounded-lg transition-all duration-300 shadow-lg hover:shadow-xl disabled:bg-gray-500 disabled:cursor-not-allowed flex justify-center items-center" 
+            onClick={handleFinish}
+            disabled={loadingMatchFinish}
+          >
+            {loadingMatchFinish ? <LoadingSpinner /> : (selectedMatchObj.inning === 1 ? "Finish Inning" : "Finish Match")}
+          </button>
+        }
       </div>
     </div>
+  </div>
+</div>
   );
-};
-
+}
+ 
 export default ScorePortal;

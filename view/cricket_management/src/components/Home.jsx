@@ -27,7 +27,6 @@ const Home = () => {
     axios.get('/matches/today', { headers: { Authorization: `Bearer ${cookies.token}` } })
       .then((response) => {
         setTodaysMatches(response.data);
-        console.log(response.data);
         setLoadingMatches(false);
       })
       .catch((error) => {
@@ -41,7 +40,6 @@ const Home = () => {
     axios.get(`/matches/player_statistics/?match_id=${id}`,{headers: {Authorization: `Bearer ${cookies.token}`}})
     .then((response) => {
       setDetails(response.data);
-      console.log(response.data);
     }).catch((error) => {
       console.log(error);
     }).finally(()=>{
@@ -228,7 +226,7 @@ const Home = () => {
                                                         ))}
                                                     </tbody>
                                               </table>
-                                            </div>      }                   
+                                            </div>}                   
                                           </div>
                                       ) : (
                                           <div className="bg-white/5 border border-white/10 rounded-lg p-8 text-center">
