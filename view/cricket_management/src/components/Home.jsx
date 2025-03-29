@@ -41,6 +41,7 @@ const Home = () => {
     axios.get(`/matches/player_statistics/?match_id=${id}`,{headers: {Authorization: `Bearer ${cookies.token}`}})
     .then((response) => {
       setDetails(response.data);
+      console.log(response.data);
     }).catch((error) => {
       console.log(error);
     }).finally(()=>{
@@ -118,7 +119,7 @@ const Home = () => {
                                           <LoadingSpinner />
                                       </div>
                                   ) : (
-                                    !loadingDetails && ( (details.team_a_bowler_stats!== undefined && details.team_a_bowler_stats.length !== 0) ? (
+                                    !loadingDetails && ( ((details.team_a_bowler_stats!== undefined && details.team_a_bowler_stats.length !== 0) || (details.team_b_bowler_stats!== undefined && details.team_b_bowler_stats.length !== 0) || (details.team_b_batsman_stats!== undefined && details.team_b_batsman_stats.length !== 0) || (details.team_a_batsman_stats!== undefined && details.team_a_batsman_stats.length !== 0)) ? (
                                           <div className="overflow-x-auto h-[50vh] [&::-webkit-scrollbar]:w-2
                                           [&::-webkit-scrollbar-track]:bg-gray-100
                                           [&::-webkit-scrollbar-thumb]:bg-gray-300
@@ -126,99 +127,108 @@ const Home = () => {
                                           dark:[&::-webkit-scrollbar-thumb]:bg-neutral-500">
                                             <h1 className="text-2Xl font-bold mb-6 text-center text-green-500">{match.team_a_name}</h1>
                                             <hr/>
-                                            <h1 className="text-2Xl font-semibold mt-2 mb-6 text-center text-white">Bowling</h1>
-                                            <hr />
+                                            { details.team_a_bowler_stats!== undefined && details.team_a_bowler_stats.length !== 0 && <div>
+                                              <h1 className="text-2Xl font-semibold mt-2 mb-6 text-center text-white">Bowling</h1>
+                                              <hr />
+                                                <table className="w-full text-left">
+                                                    <thead>
+                                                        <tr className="border-b border-white/20">
+                                                            <th className="p-3 text-white/90 font-semibold">Name</th>
+                                                            <th className="p-3 text-white/90 font-semibold">Runs</th>
+                                                            <th className="p-3 text-white/90 font-semibold">Wickets</th>
+                                                            <th className="p-3 text-white/90 font-semibold">Economy</th>
+                                                        </tr>
+                                                    </thead>
+                                                    <tbody>
+                                                        {details.team_a_bowler_stats.map((bowler) => (
+                                                            <tr key={bowler.player_id} className="border-b border-white/20">
+                                                                <td className="p-3 text-white/90">{bowler.bowler_name}</td>
+                                                                <td className="p-3 text-white/90">{bowler.bowler_runs}</td>
+                                                                <td className="p-3 text-white/90">{bowler.wickets}</td>
+                                                                <td className="p-3 text-white/90">{parseFloat((bowler.bowler_runs / (bowler.balls_bowled / 6)).toFixed(2))}</td>
+                                                            </tr>
+                                                        ))}
+                                                    </tbody>
+                                                </table>
+                                              <hr/>
+                                            </div>}
+                                            { details.team_a_batsman_stats!== undefined && details.team_a_batsman_stats.length !== 0 && <div>
+                                              <h1 className="text-2Xl font-semibold mt-2 mb-6 text-center text-white">Batting</h1>
+                                              <hr />
                                               <table className="w-full text-left">
-                                                  <thead>
-                                                      <tr className="border-b border-white/20">
-                                                          <th className="p-3 text-white/90 font-semibold">Name</th>
-                                                          <th className="p-3 text-white/90 font-semibold">Runs</th>
-                                                          <th className="p-3 text-white/90 font-semibold">Wickets</th>
-                                                          <th className="p-3 text-white/90 font-semibold">Economy</th>
-                                                      </tr>
-                                                  </thead>
-                                                  <tbody>
-                                                      {details.team_a_bowler_stats.map((bowler) => (
-                                                          <tr key={bowler.player_id} className="border-b border-white/20">
-                                                              <td className="p-3 text-white/90">{bowler.bowler_name}</td>
-                                                              <td className="p-3 text-white/90">{bowler.bowler_runs}</td>
-                                                              <td className="p-3 text-white/90">{bowler.wickets}</td>
-                                                              <td className="p-3 text-white/90">{parseFloat((bowler.bowler_runs / (bowler.balls_bowled / 6)).toFixed(2))}</td>
-                                                          </tr>
-                                                      ))}
-                                                  </tbody>
+                                                    <thead>
+                                                        <tr className="border-b border-white/20">
+                                                            <th className="p-3 text-white/90 font-semibold">Name</th>
+                                                            <th className="p-3 text-white/90 font-semibold">Runs</th>
+                                                            <th className="p-3 text-white/90 font-semibold">Balls Played</th>
+                                                            <th className="p-3 text-white/90 font-semibold">Strike Rate</th>
+                                                        </tr>
+                                                    </thead>
+                                                    <tbody>
+                                                        {details.team_a_batsman_stats.map((batsman) => (
+                                                            <tr key={batsman.player_id} className="border-b border-white/20">
+                                                                <td className="p-3 text-white/90">{batsman.batsman_name}{batsman.is_wicket? "":"*"}</td>
+                                                                <td className="p-3 text-white/90">{batsman.batsman_score}</td>
+                                                                <td className="p-3 text-white/90">{batsman.balls_played}</td>
+                                                                <td className="p-3 text-white/90">{parseFloat(((batsman.batsman_score / batsman.balls_played) * 100).toFixed(2))}</td>
+                                                            </tr>
+                                                        ))}
+                                                    </tbody>
                                               </table>
-                                            <hr/>
-                                            <h1 className="text-2Xl font-semibold mt-2 mb-6 text-center text-white">Batting</h1>
-                                            <hr />
-                                            <table className="w-full text-left">
-                                                  <thead>
-                                                      <tr className="border-b border-white/20">
-                                                          <th className="p-3 text-white/90 font-semibold">Name</th>
-                                                          <th className="p-3 text-white/90 font-semibold">Runs</th>
-                                                          <th className="p-3 text-white/90 font-semibold">Balls Played</th>
-                                                          <th className="p-3 text-white/90 font-semibold">Strike Rate</th>
-                                                      </tr>
-                                                  </thead>
-                                                  <tbody>
-                                                      {details.team_a_batsman_stats.map((batsman) => (
-                                                          <tr key={batsman.player_id} className="border-b border-white/20">
-                                                              <td className="p-3 text-white/90">{batsman.batsman_name}{batsman.is_wicket? "":"*"}</td>
-                                                              <td className="p-3 text-white/90">{batsman.batsman_score}</td>
-                                                              <td className="p-3 text-white/90">{batsman.balls_played}</td>
-                                                              <td className="p-3 text-white/90">{parseFloat(((batsman.batsman_score / batsman.balls_played) * 100).toFixed(2))}</td>
-                                                          </tr>
-                                                      ))}
-                                                  </tbody>
-                                            </table>
-                                            <hr/>
+                                              <hr/>
+                                            </div>}
+                                            
                                             <h1 className="text-4Xl font-bold mb-6 mt-2 text-center text-green-500">{match.team_b_name}</h1>
                                             <hr />
-                                            <h1 className="text-2Xl font-semibold mt-2 mb-6 text-center text-white">Bowling</h1>
-                                            <hr />
+                                            { details.team_b_bowler_stats!== undefined && details.team_b_bowler_stats.length !== 0 && <div>
+                                              <h1 className="text-2Xl font-semibold mt-2 mb-6 text-center text-white">Bowling</h1>
+                                              <hr />
+                                                <table className="w-full text-left">
+                                                    <thead>
+                                                        <tr className="border-b border-white/20">
+                                                            <th className="p-3 text-white/90 font-semibold">Name</th>
+                                                            <th className="p-3 text-white/90 font-semibold">Runs</th>
+                                                            <th className="p-3 text-white/90 font-semibold">Wickets</th>
+                                                            <th className="p-3 text-white/90 font-semibold">Economy</th>
+                                                        </tr>
+                                                    </thead>
+                                                    <tbody>
+                                                        {details.team_b_bowler_stats.map((bowler) => (
+                                                            <tr key={bowler.player_id} className="border-b border-white/20">
+                                                                <td className="p-3 text-white/90">{bowler.bowler_name}</td>
+                                                                <td className="p-3 text-white/90">{bowler.bowler_runs}</td>
+                                                                <td className="p-3 text-white/90">{bowler.wickets}</td>
+                                                                <td className="p-3 text-white/90">{parseFloat((bowler.bowler_runs / (bowler.balls_bowled / 6)).toFixed(2))}</td>
+                                                            </tr>
+                                                        ))}
+                                                    </tbody>
+                                                </table>
+                                              <hr/>
+                                            </div>}
+                                            {details.team_b_batsman_stats!== undefined && details.team_b_batsman_stats.length !== 0 && <div>
+                                              <h1 className="text-2Xl font-semibold mt-2 mb-6 text-center text-white">Batting</h1>
+                                              <hr />
                                               <table className="w-full text-left">
-                                                  <thead>
-                                                      <tr className="border-b border-white/20">
-                                                          <th className="p-3 text-white/90 font-semibold">Name</th>
-                                                          <th className="p-3 text-white/90 font-semibold">Runs</th>
-                                                          <th className="p-3 text-white/90 font-semibold">Wickets</th>
-                                                          <th className="p-3 text-white/90 font-semibold">Economy</th>
-                                                      </tr>
-                                                  </thead>
-                                                  <tbody>
-                                                      {details.team_b_bowler_stats.map((bowler) => (
-                                                          <tr key={bowler.player_id} className="border-b border-white/20">
-                                                              <td className="p-3 text-white/90">{bowler.bowler_name}</td>
-                                                              <td className="p-3 text-white/90">{bowler.bowler_runs}</td>
-                                                              <td className="p-3 text-white/90">{bowler.wickets}</td>
-                                                              <td className="p-3 text-white/90">{parseFloat((bowler.bowler_runs / (bowler.balls_bowled / 6)).toFixed(2))}</td>
-                                                          </tr>
-                                                      ))}
-                                                  </tbody>
+                                                    <thead>
+                                                        <tr className="border-b border-white/20">
+                                                            <th className="p-3 text-white/90 font-semibold">Name</th>
+                                                            <th className="p-3 text-white/90 font-semibold">Runs</th>
+                                                            <th className="p-3 text-white/90 font-semibold">Balls Played</th>
+                                                            <th className="p-3 text-white/90 font-semibold">Strike Rate</th>
+                                                        </tr>
+                                                    </thead>
+                                                    <tbody>
+                                                        {details.team_b_batsman_stats.map((batsman) => (
+                                                            <tr key={batsman.player_id} className="border-b border-white/20">
+                                                                <td className="p-3 text-white/90">{batsman.batsman_name}{batsman.is_wicket? "":"*"}</td>
+                                                                <td className="p-3 text-white/90">{batsman.batsman_score}</td>
+                                                                <td className="p-3 text-white/90">{batsman.balls_played}</td>
+                                                                <td className="p-3 text-white/90">{parseFloat(((batsman.batsman_score / batsman.balls_played) * 100).toFixed(2))}</td>
+                                                            </tr>
+                                                        ))}
+                                                    </tbody>
                                               </table>
-                                            <hr/>
-                                            <h1 className="text-2Xl font-semibold mt-2 mb-6 text-center text-white">Batting</h1>
-                                            <hr />
-                                            <table className="w-full text-left">
-                                                  <thead>
-                                                      <tr className="border-b border-white/20">
-                                                          <th className="p-3 text-white/90 font-semibold">Name</th>
-                                                          <th className="p-3 text-white/90 font-semibold">Runs</th>
-                                                          <th className="p-3 text-white/90 font-semibold">Balls Played</th>
-                                                          <th className="p-3 text-white/90 font-semibold">Strike Rate</th>
-                                                      </tr>
-                                                  </thead>
-                                                  <tbody>
-                                                      {details.team_b_batsman_stats.map((batsman) => (
-                                                          <tr key={batsman.player_id} className="border-b border-white/20">
-                                                              <td className="p-3 text-white/90">{batsman.batsman_name}{batsman.is_wicket? "":"*"}</td>
-                                                              <td className="p-3 text-white/90">{batsman.batsman_score}</td>
-                                                              <td className="p-3 text-white/90">{batsman.balls_played}</td>
-                                                              <td className="p-3 text-white/90">{parseFloat(((batsman.batsman_score / batsman.balls_played) * 100).toFixed(2))}</td>
-                                                          </tr>
-                                                      ))}
-                                                  </tbody>
-                                            </table>
+                                            </div>      }                   
                                           </div>
                                       ) : (
                                           <div className="bg-white/5 border border-white/10 rounded-lg p-8 text-center">
