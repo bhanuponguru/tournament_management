@@ -69,9 +69,10 @@ const ManagerPortalHome = () => {
 
   return (
     <div 
-      className="flex bg-[url(https://c0.wallpaperflare.com/path/967/82/462/australia-richmond-melbourne-cricket-ground-cricket-371772744fa62261f54850a915da5c9b.jpg)] items-center justify-center min-h-screen bg-gray-900 text-white p-6 bg-cover bg-center"
+      className="flex  bg-[url(https://c0.wallpaperflare.com/path/967/82/462/australia-richmond-melbourne-cricket-ground-cricket-371772744fa62261f54850a915da5c9b.jpg)] items-center justify-center min-h-screen bg-gray-900 text-white p-6 bg-cover bg-center"
 
     >
+      <div className="w-screen h-screen fixed left-0 top-0 bg-black/30 "></div>
       <div className="w-full max-w-5xl bg-white/10 rounded-3xl overflow-hidden shadow-2xl">
         {/* Left Side - Background with Motivational Text */}
         <div className="flex">

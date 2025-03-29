@@ -53,7 +53,9 @@ const Navbar = () => {
                         <Link to="/" className="px-4 py-2 bg-white/20 rounded-lg border border-white/30 hover:bg-white/30 transition-all duration-300 text-white">
                             Home
                         </Link>
-                        
+                        <Link to="/players" className="px-4 py-2 bg-white/20 rounded-lg border border-white/30 hover:bg-white/30 transition-all duration-300 text-white">
+                            Players
+                        </Link>
                         <Link to="/matches" className="px-4 py-2 bg-white/20 rounded-lg border border-white/30 hover:bg-white/30 transition-all duration-300 text-white">
                             Matchs
                         </Link>

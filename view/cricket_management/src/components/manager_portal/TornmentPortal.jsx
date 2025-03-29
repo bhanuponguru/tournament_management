@@ -90,6 +90,7 @@ const TournmentPortal = () => {
   return (
     <div
       className="min-h-screen bg-[url(https://c0.wallpaperflare.com/path/967/82/462/australia-richmond-melbourne-cricket-ground-cricket-371772744fa62261f54850a915da5c9b.jpg)] bg-gray-900 text-white p-6 bg-cover bg-center"
+      
     >
       <div className="absolute inset-0 bg-black/50"></div>
       
