@@ -55,7 +55,7 @@ def get_all_tournaments(user: dict = Depends(get_current_user)):
     return tournaments
 
 @tournament.get("/players")
-def get_players_in_tournament(tournament_id: int, user: dict = Depends(get_current_user)):
+def get_players_in_tournament(tournament_id: int):
     conn = get_connection()
     cursor = conn.cursor(dictionary=True)
     cursor.execute("SELECT * FROM tournament WHERE tournament_id = %s", (tournament_id,))
@@ -68,7 +68,7 @@ def get_players_in_tournament(tournament_id: int, user: dict = Depends(get_curre
     teams = cursor.fetchall()
     players = []
     for team in teams:
-        cursor.execute("SELECT * FROM player WHERE team_id = %s", (team["team_id"],))
+        cursor.execute("SELECT * FROM player natural join (select name as team_name, team_id from team) as team WHERE team_id = %s", (team["team_id"],))
         players += cursor.fetchall()
     cursor.close()
     conn.close()
