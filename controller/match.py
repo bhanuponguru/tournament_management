@@ -168,8 +168,8 @@ def get_matches_today(user: dict = Depends(get_current_user)):
         last_wicket = cursor.fetchone()
         result={}
         result["last_update"] = last_update
-        result["last_batsman_stats"] = batsman_stats
-        result["last_bowler_stats"] = bowler_stats
+        result["batsman_statistics"] = batsman_stats
+        result["bowler_statistics"] = bowler_stats
         result["last_wicket"] = last_wicket
         m["last_update"] = result
     cursor.close()
