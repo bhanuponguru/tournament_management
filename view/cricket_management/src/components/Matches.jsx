@@ -201,10 +201,11 @@ const Matches = () => {
                       <div className="flex justify-center items-center h-64">
                         <LoadingSpinner />
                       </div>
-                    ):(!loadingDetails && ( (details.team_a_bowler_stats!== undefined && details.team_a_bowler_stats.length !== 0) ? (
+                    ):(!loadingDetails && ( ((details.team_a_bowler_stats!== undefined && details.team_a_bowler_stats.length !== 0) || (details.team_b_bowler_stats!== undefined && details.team_b_bowler_stats.length !== 0) || (details.team_b_batsman_stats!== undefined && details.team_b_batsman_stats.length !== 0) || (details.team_a_batsman_stats!== undefined && details.team_a_batsman_stats.length !== 0)) ? (
                       <div className="flex flex-col items-center justify-center">
                           <h1 className="text-2Xl font-bold mb-6 text-center text-green-500">{team1Name}</h1>
                           <hr/>
+                          { details.team_a_bowler_stats!== undefined && details.team_a_bowler_stats.length !== 0 && <div>
                           <h1 className="text-2Xl font-semibold mt-2 mb-6 text-center text-white">Bowling</h1>
                           <hr />
                             <table className="w-full text-left">
@@ -228,6 +229,8 @@ const Matches = () => {
                                 </tbody>
                             </table>
                           <hr/>
+                        </div>}
+                        { details.team_a_batsman_stats!== undefined && details.team_a_batsman_stats.length !== 0 && <div>
                           <h1 className="text-2Xl font-semibold mt-2 mb-6 text-center text-white">Batting</h1>
                           <hr />
                           <table className="w-full text-left">
@@ -251,8 +254,11 @@ const Matches = () => {
                                 </tbody>
                           </table>
                           <hr/>
-                          <h1 className="text-4Xl font-bold mb-6 mt-2 text-center text-green-500">{team2Name}</h1>
-                          <hr />
+                        </div>}
+                        
+                        <h1 className="text-4Xl font-bold mb-6 mt-2 text-center text-green-500">{team2Name}</h1>
+                        <hr />
+                        { details.team_b_bowler_stats!== undefined && details.team_b_bowler_stats.length !== 0 && <div>
                           <h1 className="text-2Xl font-semibold mt-2 mb-6 text-center text-white">Bowling</h1>
                           <hr />
                             <table className="w-full text-left">
@@ -276,6 +282,8 @@ const Matches = () => {
                                 </tbody>
                             </table>
                           <hr/>
+                        </div>}
+                        {details.team_b_batsman_stats!== undefined && details.team_b_batsman_stats.length !== 0 && <div>
                           <h1 className="text-2Xl font-semibold mt-2 mb-6 text-center text-white">Batting</h1>
                           <hr />
                           <table className="w-full text-left">
@@ -298,6 +306,7 @@ const Matches = () => {
                                     ))}
                                 </tbody>
                           </table>
+                        </div>}  
                       </div>
                       ):(
                         <div className="bg-white/5 border border-white/10 rounded-lg p-8 text-center">
