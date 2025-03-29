@@ -112,7 +112,7 @@ const NotificationBox = ({ isOpen, setIsOpen, role, notifications, setNotificati
 
                   {notification.status === "approved" && (
                     <p className="mt-2 text-sm font-semibold text-green-400">
-                      {`role === "admin" ? "Approved" : Approved by: ${notification.admin_email}`}
+                      {role === "admin" ? "Approved" : `Approved by: ${notification.admin_email}`}
                     </p>
                   )}
                   {notification.status === "declined" && (
